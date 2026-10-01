@@ -1,15 +1,18 @@
 import { Toolbar } from "./Toolbar";
 import { Viewport } from "./Viewport";
 import { SidePanel } from "./SidePanel";
+import { TooltipProvider } from "./../ui/Tooltip";
 
 export function AppShell() {
   return (
-    <div className="flex h-full flex-col">
-      <Toolbar />
-      <div className="flex min-h-0 flex-1">
-        <Viewport />
-        <SidePanel />
+    <TooltipProvider>
+      <div className="flex h-full flex-col">
+        <Toolbar />
+        <div className="flex min-h-0 flex-1">
+          <Viewport />
+          <SidePanel />
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
