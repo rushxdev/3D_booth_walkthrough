@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
+/* ---------- Raw tokens (single source of truth) ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Surfaces: 3 levels */
+  --surface-0: #131416; /* app background, viewport letterbox */
+  --surface-1: #1a1b1e; /* toolbar, side panel */
+  --surface-2: #232529; /* inputs, hovered rows, list items */
+
+  /* Borders (1px, used instead of shadows) */
+  --line: #2b2d31;
+  --line-strong: #3c3f45; /* input hover, dividers needing more weight */
+
+  /* Text */
+  --fg: #e6e7e9;
+  --fg-secondary: #9a9ea6;
+  --fg-disabled: #5d6168;
+
+  /* Accent: selection, focus, primary action only */
+  --accent: #2f6bd6;        /* fills (primary button), white text = 5.0:1 */
+  --accent-hover: #3a78e6;
+  --accent-text: #6ea4f5;   /* accent-colored text/icons on dark surfaces */
+  --accent-subtle: #1c2d4a; /* flat tint for the selected list row */
+
+  /* Status (errors only; not a second accent) */
+  --danger: #e5484d;
+
+  /* Geometry */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --toolbar-h: 40px;
+  --panel-w: 300px;
+  --control-h: 24px;  /* inputs, selects, small buttons */
+  --row-h: 28px;      /* settings rows, list rows */
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
+/* ---------- Expose to Tailwind utilities ---------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-disabled: var(--fg-disabled);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-text: var(--accent-text);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Small, compact type scale */
+  --text-xs: 11px;
+  --text-xs--line-height: 16px;
+  --text-sm: 12px;
+  --text-sm--line-height: 16px;
+  --text-base: 13px;
+  --text-base--line-height: 18px;
+
+  /* Small radii only */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Enforce the brief: remove shadow/blur utilities from the theme so they
+   can't be used by accident (thin borders instead of shadows, no glass). */
+@theme {
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
 }
 
+/* ---------- Base ---------- */
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* no page scroll, ever */
+  background: var(--surface-0);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  -webkit-font-smoothing: antialiased;
 }
+
+* { box-sizing: border-box; }
+
+/* One consistent keyboard focus style */
+:focus { outline: none; }
+:focus-visible {
+  outline: 1px solid var(--accent-text);
+  outline-offset: 1px;
+}
+
+::selection { background: var(--accent-subtle); }
+
+/* Flat, thin scrollbars for the panel */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+/* Numeric inputs: tabular figures so values don't jitter while scrubbing */
+input[type="number"],
+.tabular { font-variant-numeric: tabular-nums; }
