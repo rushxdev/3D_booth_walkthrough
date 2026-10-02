@@ -1,0 +1,14 @@
+// SidePanel.tsx
+export function SidePanel() {
+  return (
+    <aside
+      aria-label="Settings"
+      className="w-(--panel-w) shrink-0 overflow-y-auto border-l border-line bg-surface-1"
+    >
+      <div className="flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-secondary">
+        Properties
+      </div>
+      <div className="p-3 text-sm text-fg-secondary">Sections go here.</div>
+    </aside>
+  );
+}
