@@ -84,33 +84,35 @@
 }
 
 /* ---------- Base ---------- */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden; /* no page scroll, ever */
-  background: var(--surface-0);
-  color: var(--fg);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  line-height: 16px;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* no page scroll, ever */
+    background: var(--surface-0);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* One consistent keyboard focus style */
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 1px solid var(--accent-text);
+    outline-offset: 1px;
+  }
+
+  ::selection { background: var(--accent-subtle); }
+
+  /* Flat, thin scrollbars for the panel */
+  * { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+  /* Numeric inputs: tabular figures so values don't jitter while scrubbing */
+  input[type="number"],
+  .tabular { font-variant-numeric: tabular-nums; }
 }
-
-* { box-sizing: border-box; }
-
-/* One consistent keyboard focus style */
-:focus { outline: none; }
-:focus-visible {
-  outline: 1px solid var(--accent-text);
-  outline-offset: 1px;
-}
-
-::selection { background: var(--accent-subtle); }
-
-/* Flat, thin scrollbars for the panel */
-* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
-
-/* Numeric inputs: tabular figures so values don't jitter while scrubbing */
-input[type="number"],
-.tabular { font-variant-numeric: tabular-nums; }
