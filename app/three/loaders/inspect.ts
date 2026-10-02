@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import { errorIssue } from "./errors";
 import type { LoadIssue } from "./errors";
 
@@ -91,8 +90,6 @@ export function emptySceneIssue(): LoadIssue {
     "The file loaded but contains no meshes. Check that the export includes geometry and not only cameras, lights or empties.",
   );
 }
-
-
 
 // Only real allocation failures. A RangeError from a DataView read is a corrupt file, not low memory.
 const OOM_PATTERN = /allocation failed|out of memory|invalid array buffer length|invalid typed array length|invalid string length/i;

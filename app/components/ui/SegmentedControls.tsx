@@ -10,6 +10,8 @@ export type SegmentOption = {
   label: string;
   icon?: LucideIcon;
   shortcut?: string;
+  disabled?: boolean;
+  hint?: string;
 };
 
 type SegmentedControlProps = {
@@ -62,6 +64,8 @@ export function SegmentedControl({
           >
             {Icon && <Icon size={14} strokeWidth={1.75} aria-hidden />}
             {!iconOnly && <span className="truncate">{o.label}</span>}
+            disabled={o.disabled}
+            title={o.disabled ? o.hint : undefined}
           </ToggleGroup.Item>
         );
         return iconOnly ? (
