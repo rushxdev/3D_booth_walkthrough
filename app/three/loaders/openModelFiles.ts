@@ -32,7 +32,15 @@ export async function openModelFiles(files: File[]): Promise<void> {
       s.setIssue(loaded.error);
       return;
     }
-    s.setModel({ kind: "file", name: primary.name, size: primary.size, scene: loaded.scene });
+    s.setModel({
+      kind: "file",
+      name: primary.name,
+      size: primary.size,
+      scene: loaded.scene,
+      measure: loaded.measure,
+      unit: loaded.unit,
+      detectedUnit: loaded.unit,
+    });
   } catch (err) {
     console.error("[openModelFiles]", err);
     if (token !== currentLoad) return;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { checkGlbHeader, classifyError, countMeshes, hasGlbMagic, inspectGltfJson } from "./inspect";
+import { checkGlbHeader, classifyError, hasGlbMagic, inspectGltfJson } from "./inspect";
 
 function glb(version = 2, declared = 12, actual = 12): ArrayBuffer {
   const buf = new ArrayBuffer(actual);
@@ -65,15 +65,5 @@ describe("classifyError", () => {
   });
   it("falls back to corrupt-file for anything else", () => {
     expect(classifyError("boom").code).toBe("corrupt-file");
-  });
-});
-
-describe("countMeshes", () => {
-  it("counts only meshes, nested", () => {
-    const root = new THREE.Group();
-    const child = new THREE.Group();
-    child.add(new THREE.Mesh(new THREE.BoxGeometry()));
-    root.add(child, new THREE.Mesh(new THREE.BoxGeometry()), new THREE.Object3D());
-    expect(countMeshes(root)).toBe(2);
   });
 });

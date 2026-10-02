@@ -7,6 +7,8 @@ import { Floor } from "./Floor";
 import { SampleBooth } from "./SampleBooth";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { registerLoaderRenderer } from "../loaders/gltfLoader";
+import { FileModel } from "./FileModel";
+import { OrbitControls } from "@react-three/drei";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -33,9 +35,12 @@ export default function SceneCanvas() {
 
       <Lighting />
       <Floor />
+      <OrbitControls makeDefault />
       
       {model?.kind === "sample" && <SampleBooth />}
-      {model?.kind === "file" && <primitive object={model.scene} />}
+      {model?.kind === "file" && (
+      <FileModel key={model.scene.uuid} scene={model.scene} measure={model.measure} unit={model.unit} />
+      )}
 
     </Canvas>
   );

@@ -5,15 +5,20 @@ import { getGltfLoader } from "./gltfLoader";
 import {
   checkGlbHeader,
   classifyError,
-  countMeshes,
   emptySceneIssue,
   hasGlbMagic,
   inspectGltfJson,
   missingResourcesIssue,
 } from "./inspect";
 import { getExtension } from "./validate";
+import { ModelMeasure } from "./normalize";
+import type { Unit } from "./../../lib/units";
+import { guessUnit } from "./../../lib/units";
+import { largestDimension, measureModel } from "./normalize";
 
-export type LoadResult = { ok: true; scene: THREE.Group } | { ok: false; error: LoadIssue };
+export type LoadResult =
+  | { ok: true; scene: THREE.Group; measure: ModelMeasure; unit: Unit }
+  | { ok: false; error: LoadIssue };
 
 const fail = (error: LoadIssue): LoadResult => ({ ok: false, error });
 
@@ -45,9 +50,10 @@ export async function loadModel(file: File): Promise<LoadResult> {
 
     const gltf = await getGltfLoader().parseAsync(input, "");
     const scene = gltf.scene ?? gltf.scenes?.[0];
-    if (!scene || countMeshes(scene) === 0) return fail(emptySceneIssue());
-
-    return { ok: true, scene };
+    if (!scene) return fail(emptySceneIssue());
+    const measure = measureModel(scene);
+    if (!measure) return fail(emptySceneIssue());
+    return { ok: true, scene, measure, unit: guessUnit(largestDimension(measure)) };
   } catch (err) {
     console.error("[loadModel]", err);
     return fail(classifyError(err));

@@ -92,13 +92,7 @@ export function emptySceneIssue(): LoadIssue {
   );
 }
 
-export function countMeshes(root: THREE.Object3D): number {
-  let n = 0;
-  root.traverse((o) => {
-    if ((o as THREE.Mesh).isMesh) n += 1;
-  });
-  return n;
-}
+
 
 // Only real allocation failures. A RangeError from a DataView read is a corrupt file, not low memory.
 const OOM_PATTERN = /allocation failed|out of memory|invalid array buffer length|invalid typed array length|invalid string length/i;
