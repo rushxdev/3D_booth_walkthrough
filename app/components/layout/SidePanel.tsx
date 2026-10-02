@@ -1,3 +1,5 @@
+import { ModelInfo } from "../panels/ModelInfo";
+
 // SidePanel.tsx
 export function SidePanel() {
   return (
@@ -8,7 +10,7 @@ export function SidePanel() {
       <div className="flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-secondary">
         Properties
       </div>
-      <div className="p-3 text-sm text-fg-secondary">Sections go here.</div>
+      <ModelInfo />
     </aside>
   );
 }
