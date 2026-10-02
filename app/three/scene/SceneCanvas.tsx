@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { Lighting } from "./Lighting";
 import { Floor } from "./Floor";
+import { SampleBooth } from "./SampleBooth";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -12,7 +13,7 @@ export default function SceneCanvas() {
   return (
     <Canvas
       dpr={[1, 2]}
-      camera={{ position: [6, 4, 8], fov: 50, near: 0.1, far: 500 }}
+      camera={{ position: [8, 6, 10], fov: 50, near: 0.1, far: 500 }}
       gl={{
         antialias: true,
         powerPreference: "high-performance",
@@ -26,16 +27,9 @@ export default function SceneCanvas() {
 
       <Lighting />
       <Floor />
+      
+      <SampleBooth />
 
-      {/* temporary lighting test objects, removed in 2.5 */}
-      <mesh position={[-1.2, 0.5, 0]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#cfd2d6" roughness={0.6} />
-      </mesh>
-      <mesh position={[1.2, 0.5, 0]}>
-        <sphereGeometry args={[0.5, 48, 32]} />
-        <meshStandardMaterial color="#cfd2d6" roughness={0.25} metalness={0.9} />
-      </mesh>
     </Canvas>
   );
 }
