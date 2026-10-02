@@ -9,6 +9,7 @@ import { useSceneStore } from "./../../store/useSceneStore";
 import { useUiStore } from "./../../store/useUiStore";
 import { measureModel } from "../loaders/normalize";
 import { DEFAULT_BOUNDS, computeFraming, viewLimits } from "./framing";
+import { getCollider, getModelKey } from "../collision/colliderCache";
 
 const FLOOR_CLEARANCE = 0.1; // meters; the camera never sinks below this
 
@@ -44,6 +45,7 @@ export function OverviewControls({ modelRef }: Props) {
     camera.position.set(...framing.position);
     controls.target.set(...framing.target);
     controls.update();
+    if (modelRef.current) getCollider(modelRef.current, getModelKey(model)); // temporary: remove in 5.5
   }, [model, frameTick, store, modelRef]);
 
   // Runs after OrbitControls' own update (priority -1), so it wins.
