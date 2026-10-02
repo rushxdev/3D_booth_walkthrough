@@ -3,6 +3,7 @@
 import { Box, FolderOpen } from "lucide-react";
 import { Button } from "./../../components/ui/Button";
 import { useSceneStore } from "./../../store/useSceneStore";
+import { openModelDialog } from "@/app/three/loaders/openModelFiles";
 
 export function EmptyState() {
   const loadSample = useSceneStore((s) => s.loadSample);
@@ -17,12 +18,11 @@ export function EmptyState() {
           Open a .glb or .gltf file, or load the sample booth to try the tool.
         </p>
         <div className="mt-3 flex gap-2">
-          {/* Flip these two variants in step 3.1, when Open model becomes the main action */}
-          <Button variant="primary" icon={Box} onClick={loadSample}>
-            Load sample
-          </Button>
-          <Button icon={FolderOpen} disabled>
+          <Button variant="primary" icon={FolderOpen} onClick={openModelDialog}>
             Open model
+          </Button>
+          <Button icon={Box} onClick={loadSample}>
+            Load sample
           </Button>
         </div>
       </div>
