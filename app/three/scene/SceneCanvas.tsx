@@ -6,6 +6,7 @@ import { Lighting } from "./Lighting";
 import { Floor } from "./Floor";
 import { SampleBooth } from "./SampleBooth";
 import { useSceneStore } from "./../../store/useSceneStore";
+import { registerLoaderRenderer } from "../loaders/gltfLoader";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -24,6 +25,7 @@ export default function SceneCanvas() {
         toneMapping: THREE.ACESFilmicToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
       }}
+      onCreated={({ gl }) => registerLoaderRenderer(gl)}
     >
       <color attach="background" args={[BACKGROUND]} />
       {/* distant ground fades into the background: no hard horizon line */}
@@ -33,6 +35,7 @@ export default function SceneCanvas() {
       <Floor />
       
       {model?.kind === "sample" && <SampleBooth />}
+      {model?.kind === "file" && <primitive object={model.scene} />}
 
     </Canvas>
   );

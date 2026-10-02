@@ -8,6 +8,16 @@ import { useSceneStore } from "./../../store/useSceneStore";
 export function ViewportNotice() {
   const issue = useSceneStore((s) => s.issue);
   const setIssue = useSceneStore((s) => s.setIssue);
+  const loadingName = useSceneStore((s) => s.loadingName);
+  
+  if (loadingName) {
+    return (
+      <div role="status" className="absolute top-3 left-1/2 z-10 -translate-x-1/2 rounded-md border border-line-strong bg-surface-1 px-3 py-1.5 text-sm text-fg-secondary">
+        Loading {loadingName}...
+      </div>
+    );
+  }
+
   if (!issue) return null;
 
   const isError = issue.severity === "error";

@@ -1,22 +1,45 @@
 import { pickFiles } from "./../../lib/pickFiles";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { isAllowedExtension, validateModelFile } from "./validate";
+import { errorIssue } from "./errors";
+
+let currentLoad = 0;
 
 /** Single entry point for "the user gave us files", from the dialog or a drop. */
-export function openModelFiles(files: File[]): void {
+export async function openModelFiles(files: File[]): Promise<void> {
   const primary = files.find((f) => isAllowedExtension(f.name)) ?? files[0];
   if (!primary) return;
 
-  const { setIssue } = useSceneStore.getState();
+  const store = useSceneStore.getState();
   const result = validateModelFile(primary);
   if (!result.ok) {
-    setIssue(result.error);
+    store.setIssue(result.error);
     return;
   }
-  setIssue(result.warning ?? null);
+  store.setIssue(result.warning ?? null);
 
-  // TODO(3.3): replace with loadModel(primary)
-  console.info("[open] accepted", primary.name, primary.size);
+  const token = ++currentLoad;
+  store.setLoadingName(primary.name);
+  try {
+    // Loaded on demand so three's loaders stay out of the initial shell bundle.
+    const { loadModel } = await import("./loadModel");
+    const loaded = await loadModel(primary);
+    if (token !== currentLoad) return; // a newer open superseded this one
+
+    const s = useSceneStore.getState();
+    s.setLoadingName(null);
+    if (!loaded.ok) {
+      s.setIssue(loaded.error);
+      return;
+    }
+    s.setModel({ kind: "file", name: primary.name, size: primary.size, scene: loaded.scene });
+  } catch (err) {
+    console.error("[openModelFiles]", err);
+    if (token !== currentLoad) return;
+    const s = useSceneStore.getState();
+    s.setLoadingName(null);
+    s.setIssue(errorIssue("unexpected", "Something went wrong", "The model could not be opened. Reload the page and try again."));
+  }
 }
 
 export function openModelDialog(): void {
