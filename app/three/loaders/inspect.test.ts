@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import * as THREE from "three";
 import { checkGlbHeader, classifyError, hasGlbMagic, inspectGltfJson } from "./inspect";
 
 function glb(version = 2, declared = 12, actual = 12): ArrayBuffer {

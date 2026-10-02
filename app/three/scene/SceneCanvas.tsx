@@ -1,14 +1,16 @@
 "use client";
 
+import { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { Lighting } from "./Lighting";
 import { Floor } from "./Floor";
 import { SampleBooth } from "./SampleBooth";
 import { useSceneStore } from "./../../store/useSceneStore";
+import { useUiStore } from "./../../store/useUiStore";
+import { OverviewControls } from "../controls/OverviewControls";
 import { registerLoaderRenderer } from "../loaders/gltfLoader";
 import { FileModel } from "./FileModel";
-import { OrbitControls } from "@react-three/drei";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -16,6 +18,8 @@ const BACKGROUND = "#131416";
 export default function SceneCanvas() {
 
   const model = useSceneStore((s) => s.model);
+  const mode = useUiStore((s) => s.mode);
+  const modelRef = useRef<THREE.Group>(null);
   
   return (
     <Canvas
@@ -35,12 +39,14 @@ export default function SceneCanvas() {
 
       <Lighting />
       <Floor />
-      <OrbitControls makeDefault />
-      
-      {model?.kind === "sample" && <SampleBooth />}
-      {model?.kind === "file" && (
-      <FileModel key={model.scene.uuid} scene={model.scene} measure={model.measure} unit={model.unit} />
-      )}
+      <group ref={modelRef}>
+        {model?.kind === "sample" && <SampleBooth />}
+        {model?.kind === "file" && (
+          <FileModel key={model.scene.uuid} scene={model.scene} measure={model.measure} unit={model.unit} />
+        )}
+      </group>
+
+      {mode === "overview" && <OverviewControls modelRef={modelRef} />}
 
     </Canvas>
   );

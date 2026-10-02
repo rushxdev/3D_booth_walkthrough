@@ -1,14 +1,19 @@
 "use client";
 
-import { Box, FolderOpen, X } from "lucide-react";
+import { Box, FolderOpen, X, Footprints, Maximize, Orbit } from "lucide-react";
 import { IconButton } from "./../../components/ui/IconButton";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { openModelDialog } from "./../../three/loaders/openModelFiles";
+import { SegmentedControl } from "./../../components/ui/SegmentedControls";
+import { isViewMode, useUiStore } from "./../../store/useUiStore";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
   const loadSample = useSceneStore((s) => s.loadSample);
   const clearModel = useSceneStore((s) => s.clearModel);
+  const mode = useUiStore((s) => s.mode);
+  const setMode = useUiStore((s) => s.setMode);
+  const requestFrame = useUiStore((s) => s.requestFrame);
 
   return (
     <header className="flex h-(--toolbar-h) shrink-0 items-center gap-1 border-b border-line bg-surface-1 px-3">
@@ -19,6 +24,16 @@ export function Toolbar() {
       <IconButton icon={X} label="Close model" onClick={clearModel} disabled={!hasModel} />
 
       <div className="flex-1" />
+      <IconButton icon={Maximize} label="Frame model" shortcut="F" onClick={requestFrame} disabled={mode !== "overview"} />
+      <SegmentedControl
+        aria-label="Camera mode"
+        value={mode}
+        onValueChange={(v) => isViewMode(v) && setMode(v)}
+        options={[
+          { value: "overview", label: "Overview", icon: Orbit },
+          { value: "walk", label: "Walk", icon: Footprints, disabled: true, hint: "Not available yet" },
+        ]}
+      />
     </header>
   );
 }
