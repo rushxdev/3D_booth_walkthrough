@@ -1,6 +1,8 @@
 "use client";
 
+import { useSceneStore } from "./../../store/useSceneStore";
 import dynamic from "next/dynamic";
+import { EmptyState } from "./EmptyState";
 
 function ViewportMessage({ children }: { children: string }) {
   return (
@@ -17,9 +19,11 @@ const SceneCanvas = dynamic(() => import("./../../three/scene/SceneCanvas"), {
 });
 
 export function Viewport() {
+  const hasModel = useSceneStore((s) => s.model !== null);
   return (
     <main className="relative min-h-0 min-w-0 flex-1 bg-surface-0">
       <SceneCanvas />
+      {!hasModel && <EmptyState />}
     </main>
   );
 }

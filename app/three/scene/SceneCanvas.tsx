@@ -5,11 +5,15 @@ import * as THREE from "three";
 import { Lighting } from "./Lighting";
 import { Floor } from "./Floor";
 import { SampleBooth } from "./SampleBooth";
+import { useSceneStore } from "./../../store/useSceneStore";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
 
 export default function SceneCanvas() {
+
+  const model = useSceneStore((s) => s.model);
+  
   return (
     <Canvas
       dpr={[1, 2]}
@@ -28,7 +32,7 @@ export default function SceneCanvas() {
       <Lighting />
       <Floor />
       
-      <SampleBooth />
+      {model?.kind === "sample" && <SampleBooth />}
 
     </Canvas>
   );
