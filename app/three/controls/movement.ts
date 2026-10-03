@@ -28,3 +28,8 @@ export function stepVelocity(velocity: Vec2, wish: Vec2, speed: number, dt: numb
   velocity.x += (wish.x * speed - velocity.x) * k;
   velocity.z += (wish.z * speed - velocity.z) * k;
 }
+
+/** Eases a value toward a target, frame-rate independent. Softens the camera pop on stairs. */
+export function smoothTowards(current: number, target: number, rate: number, dt: number): number {
+  return current + (target - current) * (1 - Math.exp(-rate * dt));
+}

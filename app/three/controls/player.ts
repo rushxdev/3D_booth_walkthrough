@@ -5,9 +5,11 @@ import type { Vec3 } from "../loaders/normalize";
 export const player = {
   position: new THREE.Vector3(),
   velocity: new THREE.Vector3(),
+  grounded: false,
 };
 
 export function placePlayer(feet: Vec3): void {
   player.position.set(...feet);
   player.velocity.set(0, 0, 0);
+  player.grounded = false;
 }

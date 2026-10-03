@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { stepVelocity, wishVector } from "./movement";
+import { smoothTowards, stepVelocity, wishVector } from "./movement";
 import type { WalkInputState } from "./walkInput";
 
 const input = (p: Partial<WalkInputState>): WalkInputState => ({ forward: false, back: false, left: false, right: false, run: false, ...p });
@@ -64,5 +64,20 @@ describe("stepVelocity", () => {
     const v = { x: 1, z: 2 };
     stepVelocity(v, { x: 1, z: 0 }, 4, 0);
     expect(v).toEqual({ x: 1, z: 2 });
+  });
+});
+
+describe("smoothTowards", () => {
+  const run = (frames: number, fps: number) => {
+    let v = 0;
+    for (let i = 0; i < frames; i++) v = smoothTowards(v, 1, 18, 1 / fps);
+    return v;
+  };
+  it("is frame-rate independent for the same elapsed time", () => {
+    expect(run(15, 30)).toBeCloseTo(run(72, 144), 10); // 0.5 s each
+  });
+  it("converges and leaves the target alone", () => {
+    expect(run(120, 60)).toBeCloseTo(1, 6);
+    expect(smoothTowards(1, 1, 18, 0.016)).toBe(1);
   });
 });
