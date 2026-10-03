@@ -31,7 +31,7 @@ export function Toolbar() {
         onValueChange={(v) => isViewMode(v) && setMode(v)}
         options={[
           { value: "overview", label: "Overview", icon: Orbit },
-          { value: "walk", label: "Walk", icon: Footprints, disabled: true, hint: "Not available yet" },
+          { value: "walk", label: "Walk", icon: Footprints, disabled: !hasModel, hint: "Load a model first" },
         ]}
       />
     </header>

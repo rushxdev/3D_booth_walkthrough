@@ -2,3 +2,6 @@
 export const MAX_SLOPE_DEG = 50;
 export const FLOOR_MIN_NY = Math.cos((MAX_SLOPE_DEG * Math.PI) / 180); // ~0.643
 export const CEILING_MAX_NY = -0.5;
+export const PLAYER_RADIUS = 0.3; // meters
+export const PLAYER_HEIGHT = 1.7;
+export const EYE_HEIGHT = 1.6;

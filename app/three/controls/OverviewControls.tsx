@@ -9,7 +9,7 @@ import { useSceneStore } from "./../../store/useSceneStore";
 import { useUiStore } from "./../../store/useUiStore";
 import { measureModel } from "../loaders/normalize";
 import { DEFAULT_BOUNDS, computeFraming, viewLimits } from "./framing";
-import { getCollider, getModelKey } from "../collision/colliderCache";
+import { applyClipPlanes } from "./applyClipPlanes";
 
 const FLOOR_CLEARANCE = 0.1; // meters; the camera never sinks below this
 
@@ -32,20 +32,13 @@ export function OverviewControls({ modelRef }: Props) {
     const framing = computeFraming(bounds.min, bounds.max, camera.fov, size.width / size.height);
     const limits = viewLimits(framing.radius);
 
-    camera.near = limits.near;
-    camera.far = limits.far;
-    camera.updateProjectionMatrix();
-    if (scene.fog instanceof THREE.Fog) {
-      scene.fog.near = limits.far * 0.3;
-      scene.fog.far = limits.far * 0.9;
-    }
+    applyClipPlanes(camera, scene, limits);
 
     controls.minDistance = limits.minDistance;
     controls.maxDistance = limits.maxDistance;
     camera.position.set(...framing.position);
     controls.target.set(...framing.target);
     controls.update();
-    if (modelRef.current) getCollider(modelRef.current, getModelKey(model)); // temporary: remove in 5.5
   }, [model, frameTick, store, modelRef]);
 
   // Runs after OrbitControls' own update (priority -1), so it wins.
