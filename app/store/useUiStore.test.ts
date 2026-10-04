@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { isViewMode, useUiStore } from "./useUiStore";
 
 describe("useUiStore", () => {
-  beforeEach(() => useUiStore.setState({ mode: "overview", resetTick: 0, walkLocked: false, walkSpeed: 2, lookSensitivity: 1 }));
+  beforeEach(() => useUiStore.setState({ mode: "overview", resetTick: 0, walkLocked: false, walkSpeed: 2, lookSensitivity: 1, lockAspect: false }));
 
   it("switches mode", () => {
     useUiStore.getState().setMode("walk");
@@ -35,5 +35,9 @@ describe("useUiStore", () => {
     expect(useUiStore.getState().walkSpeed).toBe(0.5);
     ui.setLookSensitivity(9);
     expect(useUiStore.getState().lookSensitivity).toBe(3);
+  });
+  it("toggles the aspect lock", () => {
+    useUiStore.getState().setLockAspect(true);
+    expect(useUiStore.getState().lockAspect).toBe(true);
   });
 });

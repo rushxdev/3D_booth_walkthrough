@@ -17,6 +17,7 @@ export type Screen = {
   rotation: Vec3; // radians, Euler order XYZ; the UI shows degrees
   width: number;  // meters
   height: number; // meters
+  resolution: [number, number]; // px, informational: never changes the geometry
   content: ScreenContent;
   visible: boolean;
   locked: boolean;
@@ -34,6 +35,11 @@ export const SCREEN_SIZE_RANGE = { min: 0.1, max: 50 } as const; // meters
 export const DEFAULT_SCREEN_SIZE = { width: 1.6, height: 0.9 } as const; // 16:9
 export const MAX_NAME_LENGTH = 80;
 const MAX_SRC_LENGTH = 2000;
+
+export const POSITION_RANGE = { min: -1000, max: 1000 } as const; // meters
+export const RESOLUTION_RANGE = { min: 16, max: 16384 } as const;  // px
+export const DEFAULT_RESOLUTION: [number, number] = [1920, 1080];
+const clampInt = (v: number) => Math.round(clamp(v, RESOLUTION_RANGE.min, RESOLUTION_RANGE.max));
 
 const CONTENT_TYPES: readonly string[] = ["none", "video", "web"];
 const FIT_MODES: readonly string[] = ["contain", "cover"];
@@ -65,7 +71,12 @@ export function sanitizeScreenPatch(patch: ScreenPatch): ScreenPatch {
     const name = patch.name.trim().slice(0, MAX_NAME_LENGTH);
     if (name) out.name = name;
   }
-  if (isVec3(patch.position)) out.position = [...patch.position];
+  if (isVec3(patch.position)) {
+    out.position = patch.position.map((n) => clamp(n, POSITION_RANGE.min, POSITION_RANGE.max)) as Vec3;
+  }
+  if (Array.isArray(patch.resolution) && patch.resolution.length === 2 && patch.resolution.every(isFiniteNumber)) {
+    out.resolution = [clampInt(patch.resolution[0]), clampInt(patch.resolution[1])];
+  }
   if (isVec3(patch.rotation)) out.rotation = [...patch.rotation];
   for (const key of ["width", "height"] as const) {
     const v = patch[key];
@@ -89,6 +100,7 @@ export function createScreen(id: string, name: string, overrides: ScreenPatch = 
     rotation: [0, 0, 0],
     width: DEFAULT_SCREEN_SIZE.width,
     height: DEFAULT_SCREEN_SIZE.height,
+    resolution: [...DEFAULT_RESOLUTION],
     content: { type: "none", fit: "contain" },
     visible: true,
     locked: false,

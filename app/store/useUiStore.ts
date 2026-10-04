@@ -16,12 +16,14 @@ type UiState = {
   walkLocked: boolean;
   walkSpeed: number;
   lookSensitivity: number;
+  lockAspect: boolean;
   setMode: (mode: ViewMode) => void;
   requestFrame: () => void;
   requestReset: () => void;
   setWalkLocked: (locked: boolean) => void;
   setWalkSpeed: (v: number) => void;
   setLookSensitivity: (v: number) => void;
+  setLockAspect: (locked: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -31,6 +33,7 @@ export const useUiStore = create<UiState>()((set) => ({
   walkLocked: false,
   walkSpeed: DEFAULT_WALK_SPEED,
   lookSensitivity: DEFAULT_LOOK_SENSITIVITY,
+  lockAspect: false,
   setMode: (mode) => set({ mode }),
   requestFrame: () => set((s) => ({ frameTick: s.frameTick + 1 })),
   requestReset: () => set((s) => ({ resetTick: s.resetTick + 1 })),
@@ -38,4 +41,5 @@ export const useUiStore = create<UiState>()((set) => ({
   setWalkSpeed: (v) => set(Number.isFinite(v) ? { walkSpeed: clamp(v, WALK_SPEED_RANGE.min, WALK_SPEED_RANGE.max) } : {}),
   setLookSensitivity: (v) =>
     set(Number.isFinite(v) ? { lookSensitivity: clamp(v, LOOK_SENSITIVITY_RANGE.min, LOOK_SENSITIVITY_RANGE.max) } : {}),
+  setLockAspect: (lockAspect) => set({ lockAspect }),
 }));

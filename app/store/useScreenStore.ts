@@ -61,6 +61,7 @@ export const useScreenStore = create<ScreenState>()((set, get) => ({
       position: offsetAlongRight(source.position, source.rotation, DUPLICATE_OFFSET),
       rotation: [...source.rotation],
       content: { ...source.content },
+      resolution: [...source.resolution],
       locked: false, // the copy is meant to be moved
     };
     set((s) => ({ screens: [...s.screens, copy], selectedId: copy.id }));
