@@ -13,9 +13,11 @@ import { registerLoaderRenderer } from "../loaders/gltfLoader";
 import { FileModel } from "./FileModel";
 import { WalkController } from "../controls/WalkController";
 import { CameraTracker } from "../controls/CameraTracker";
+import { BACKGROUND_COLOR } from "./theme";
+import { ScreenPicker } from "../screens/ScreenPicker";
+import { Screens } from "../screens/Screens";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
-const BACKGROUND = "#131416";
 
 export default function SceneCanvas() {
 
@@ -23,6 +25,8 @@ export default function SceneCanvas() {
   const mode = useUiStore((s) => s.mode);
   const modelRef = useRef<THREE.Group>(null);
   const setMode = useUiStore((s) => s.setMode);
+  const screensRef = useRef<THREE.Group>(null);
+  
   useEffect(() => {
     if (!model && mode === "walk") setMode("overview");
   }, [model, mode, setMode]);
@@ -39,9 +43,9 @@ export default function SceneCanvas() {
       }}
       onCreated={({ gl }) => registerLoaderRenderer(gl)}
     >
-      <color attach="background" args={[BACKGROUND]} />
+      <color attach="background" args={[BACKGROUND_COLOR]} />
       {/* distant ground fades into the background: no hard horizon line */}
-      <fog attach="fog" args={[BACKGROUND, 80, 220]} />
+      <fog attach="fog" args={[BACKGROUND_COLOR, 80, 220]} />
 
       <Lighting />
       < CameraTracker />
@@ -52,6 +56,9 @@ export default function SceneCanvas() {
           <FileModel key={model.scene.uuid} scene={model.scene} measure={model.measure} unit={model.unit} />
         )}
       </group>
+
+      <Screens groupRef={screensRef} />
+      <ScreenPicker screensRef={screensRef} modelRef={modelRef} />
 
       {mode === "overview" ? (
         <OverviewControls modelRef={modelRef} />
