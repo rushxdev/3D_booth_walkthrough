@@ -19,6 +19,12 @@ export function Shortcuts() {
             ui.requestFrame();
           }
           break;
+        case "r":
+          if (ui.mode === "walk") {
+            e.preventDefault();
+            ui.requestReset();
+          }
+          break;
       }
     }
     window.addEventListener("keydown", onKeyDown);

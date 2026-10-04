@@ -7,21 +7,21 @@ import { useFrame, useStore } from "@react-three/fiber";
 import * as THREE from "three";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { useUiStore } from "./../../store/useUiStore";
+import { getModelKey } from "../collision/colliderCache";
 import { measureModel } from "../loaders/normalize";
+import { applyClipPlanes } from "./applyClipPlanes";
 import { DEFAULT_BOUNDS, computeFraming, viewLimits } from "./framing";
+import { canRestoreOrbit, orbitView, saveOrbitView } from "./orbitView";
 
 const FLOOR_CLEARANCE = 0.1; // meters; the camera never sinks below this
 
-type Props = { modelRef: RefObject<THREE.Group | null> };
-
-export function OverviewControls({ modelRef }: Props) {
+export function OverviewControls({ modelRef }: { modelRef: RefObject<THREE.Group | null> }) {
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
   const store = useStore();
-
-  // Triggers: a new model (or unit change, which replaces the model object) and Frame requests.
-  const model = useSceneStore((s) => s.model);
+  const modelKey = getModelKey(useSceneStore((s) => s.model));
   const frameTick = useUiStore((s) => s.frameTick);
 
+  // Runs on mount (entering Overview), on a new model or unit, and on Frame requests.
   useEffect(() => {
     const controls = controlsRef.current;
     const { camera, scene, size } = store.getState();
@@ -31,34 +31,26 @@ export function OverviewControls({ modelRef }: Props) {
     const framing = computeFraming(bounds.min, bounds.max, camera.fov, size.width / size.height);
     const limits = viewLimits(framing.radius);
 
-    camera.near = limits.near;
-    camera.far = limits.far;
-    camera.updateProjectionMatrix();
-    if (scene.fog instanceof THREE.Fog) {
-      scene.fog.near = limits.far * 0.3;
-      scene.fog.far = limits.far * 0.9;
-    }
-
+    applyClipPlanes(camera, scene, limits);
     controls.minDistance = limits.minDistance;
     controls.maxDistance = limits.maxDistance;
-    camera.position.set(...framing.position);
-    controls.target.set(...framing.target);
-    controls.update();
-  }, [model, frameTick, store, modelRef]);
 
-  // Runs after OrbitControls' own update (priority -1), so it wins.
+    if (canRestoreOrbit(orbitView, modelKey, frameTick)) {
+      camera.position.copy(orbitView.position); // coming back from Walk: same view as before
+      controls.target.copy(orbitView.target);
+    } else {
+      camera.position.set(...framing.position);
+      controls.target.set(...framing.target);
+    }
+    controls.update();
+  }, [modelKey, frameTick, store, modelRef]);
+
+  // Runs after OrbitControls' own update (priority -1).
   useFrame(({ camera }) => {
     if (camera.position.y < FLOOR_CLEARANCE) camera.position.y = FLOOR_CLEARANCE;
+    const controls = controlsRef.current;
+    if (controls) saveOrbitView(camera.position, controls.target, modelKey, frameTick);
   });
 
-  return (
-    <OrbitControls
-      ref={controlsRef}
-      makeDefault
-      enableDamping
-      dampingFactor={0.12}
-      zoomToCursor
-      screenSpacePanning
-    />
-  );
+  return <OrbitControls ref={controlsRef} makeDefault enableDamping dampingFactor={0.12} zoomToCursor screenSpacePanning />;
 }
