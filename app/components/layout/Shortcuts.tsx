@@ -13,16 +13,17 @@ export function Shortcuts() {
 
       const ui = useUiStore.getState();
       const screens = useScreenStore.getState();
-      const editing = !ui.walkLocked; // with the mouse captured there is nothing to select or edit
+      const editing = !ui.walkLocked; 
       const mod = e.ctrlKey || e.metaKey;
 
       if (mod && !e.altKey && e.key.toLowerCase() === "d") {
         if (editing && screens.selectedId) {
-          e.preventDefault(); // otherwise the browser bookmarks the page
+          e.preventDefault(); 
           screens.duplicate(screens.selectedId);
         }
         return;
       }
+
       if (mod || e.altKey) return;
 
       switch (e.key.toLowerCase()) {
@@ -47,8 +48,9 @@ export function Shortcuts() {
           break;
       }
     }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   return null;
