@@ -32,13 +32,25 @@ describe("findSpawn", () => {
     expect(y).toBeCloseTo(0.1, 6);
   });
 
-  it("falls back to the floor when no spot has headroom", () => {
-    expect(findSpawn(room(floor(), box(10, 0.1, 10, 0, 1.5, 0)))).toEqual([0, expect.closeTo(0.1, 6), 0]);
+  it("stays inside a low-ceilinged room instead of spawning outside it", () => {
+    const [x, y, z] = findSpawn(room(floor(), box(10, 0.1, 10, 0, 1.5, 0)));
+    expect(x).toBeCloseTo(0, 6);
+    expect(y).toBeCloseTo(0.1, 6);
+    expect(z).toBeCloseTo(0, 6);
   });
 
-  it("copes with a floor whose triangles face down", () => {
+  it("copes with a floor whose triangles face down, and still spawns inside the model", () => {
     const geometry = new THREE.PlaneGeometry(10, 10).rotateX(Math.PI / 2); // normal now points down
-    expect(findSpawn(room(new THREE.Mesh(geometry)))[1]).toBeCloseTo(0, 6);
+    const [x, y, z] = findSpawn(room(new THREE.Mesh(geometry)));
+    expect(y).toBeCloseTo(0, 6);
+    expect(Math.abs(x)).toBeLessThanOrEqual(5); // the old version passed this model by spawning outside it
+    expect(Math.abs(z)).toBeLessThanOrEqual(5);
+  });
+
+  it("spawns beside a solid block, not inside it", () => {
+    const [x, y, z] = findSpawn(room(box(2, 3, 2, 0, 0, 0)));
+    expect(Math.max(Math.abs(x), Math.abs(z))).toBeGreaterThanOrEqual(1.35); // half-width 1 + clearance
+    expect(y).toBeCloseTo(0, 6);
   });
 
   it("honors a requested point, keeping clear of walls", () => {
