@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { Lighting } from "./Lighting";
@@ -11,6 +11,7 @@ import { useUiStore } from "./../../store/useUiStore";
 import { OverviewControls } from "../controls/OverviewControls";
 import { registerLoaderRenderer } from "../loaders/gltfLoader";
 import { FileModel } from "./FileModel";
+import { WalkController } from "../controls/WalkController";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -20,7 +21,11 @@ export default function SceneCanvas() {
   const model = useSceneStore((s) => s.model);
   const mode = useUiStore((s) => s.mode);
   const modelRef = useRef<THREE.Group>(null);
-  
+  const setMode = useUiStore((s) => s.setMode);
+  useEffect(() => {
+    if (!model && mode === "walk") setMode("overview");
+  }, [model, mode, setMode]);
+
   return (
     <Canvas
       dpr={[1, 2]}
@@ -46,7 +51,11 @@ export default function SceneCanvas() {
         )}
       </group>
 
-      {mode === "overview" && <OverviewControls modelRef={modelRef} />}
+      {mode === "overview" ? (
+        <OverviewControls modelRef={modelRef} />
+      ) : (
+        <WalkController modelRef={modelRef} />
+      )}
 
     </Canvas>
   );

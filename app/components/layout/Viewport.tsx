@@ -7,6 +7,7 @@ import { openModelFiles } from "./../../three/loaders/openModelFiles";
 import { ViewportNotice } from "./ViewportNotice";
 import { useFileDrop } from "./useFileDrop";
 import { ViewportHints } from "./ViewportHints";
+import { WalkOverlay } from "./WalkOverlay";
 
 function ViewportMessage({ children }: { children: string }) {
   return (
@@ -41,6 +42,7 @@ export function Viewport() {
       <SceneCanvas />
       {!hasModel && <EmptyState />}
       <ViewportNotice />
+      <WalkOverlay />
       <ViewportHints />
       {dragging && <DropOverlay />}
     </main>
