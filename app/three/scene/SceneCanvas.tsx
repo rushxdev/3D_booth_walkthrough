@@ -12,6 +12,7 @@ import { OverviewControls } from "../controls/OverviewControls";
 import { registerLoaderRenderer } from "../loaders/gltfLoader";
 import { FileModel } from "./FileModel";
 import { WalkController } from "../controls/WalkController";
+import { CameraTracker } from "../controls/CameraTracker";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 const BACKGROUND = "#131416";
@@ -43,6 +44,7 @@ export default function SceneCanvas() {
       <fog attach="fog" args={[BACKGROUND, 80, 220]} />
 
       <Lighting />
+      < CameraTracker />
       <Floor />
       <group ref={modelRef}>
         {model?.kind === "sample" && <SampleBooth />}
