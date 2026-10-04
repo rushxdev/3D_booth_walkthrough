@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { smoothTowards, stepVelocity, wishVector } from "./movement";
+import { smoothTowards, stepVelocity, wishVector, yawFromDirection } from "./movement";
 import type { WalkInputState } from "./walkInput";
 
 const input = (p: Partial<WalkInputState>): WalkInputState => ({ forward: false, back: false, left: false, right: false, run: false, ...p });
@@ -79,5 +79,19 @@ describe("smoothTowards", () => {
   it("converges and leaves the target alone", () => {
     expect(run(120, 60)).toBeCloseTo(1, 6);
     expect(smoothTowards(1, 1, 18, 0.016)).toBe(1);
+  });
+});
+
+describe("yawFromDirection", () => {
+  it("makes forward point along the given direction", () => {
+    for (const [dx, dz] of [[0, -1], [-1, 0], [1, 0], [0, 1], [3, -4], [-2, -2]]) {
+      const w = wishVector(input({ forward: true }), yawFromDirection(dx, dz));
+      const len = Math.hypot(dx, dz);
+      expect(w.x).toBeCloseTo(dx / len, 10);
+      expect(w.z).toBeCloseTo(dz / len, 10);
+    }
+  });
+  it("returns 0 when there is no horizontal direction", () => {
+    expect(yawFromDirection(0, 0)).toBe(0);
   });
 });

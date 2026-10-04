@@ -1,38 +1,45 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { useFrame, useStore } from "@react-three/fiber";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { useUiStore } from "./../../store/useUiStore";
+import type { Collider } from "../collision/buildCollider";
+import { stepMover } from "../collision/capsuleMover";
 import { getCollider, getModelKey } from "../collision/colliderCache";
 import { EYE_HEIGHT } from "../collision/constants";
 import { findSpawn } from "../collision/spawn";
 import { applyClipPlanes } from "./applyClipPlanes";
 import { viewLimits } from "./framing";
-import { MAX_DT, RUN_SPEED, WALK_SPEED, smoothTowards, stepVelocity, wishVector } from "./movement";
+import { MAX_DT, RUN_MULTIPLIER, smoothTowards, stepVelocity, wishVector, yawFromDirection } from "./movement";
+import { orbitView } from "./orbitView";
 import { placePlayer, player } from "./player";
 import { registerPointerLocker } from "./walkLock";
 import { walkInput } from "./walkInput";
-import { Collider } from "../collision/buildCollider";
-import { stepMover } from "../collision/capsuleMover";
 
 const euler = new THREE.Euler(0, 0, 0, "YXZ");
 
 export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group | null> }) {
   const store = useStore();
   const model = useSceneStore((s) => s.model);
+  const resetTick = useUiStore((s) => s.resetTick);
   const colliderRef = useRef<Collider | null>(null);
   const eyeY = useRef(0);
+  const handledReset = useRef(resetTick);
 
-  // Mouse look (pointer lock) and keyboard, for as long as walk mode is mounted.
+  // Mouse look (pointer lock), keyboard and sensitivity, while walk mode is mounted.
   useEffect(() => {
     const { camera, gl } = store.getState();
     const controls = new PointerLockControls(camera, gl.domElement);
     controls.minPolarAngle = 0.05; // stop short of straight up/down so the view can't flip
     controls.maxPolarAngle = Math.PI - 0.05;
+    controls.pointerSpeed = useUiStore.getState().lookSensitivity;
+    const unsubscribe = useUiStore.subscribe((s) => {
+      controls.pointerSpeed = s.lookSensitivity;
+    });
 
     const onLock = () => useUiStore.getState().setWalkLocked(true);
     const onUnlock = () => {
@@ -45,6 +52,7 @@ export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group |
     const detachKeys = walkInput.attach(window, () => useUiStore.getState().walkLocked);
 
     return () => {
+      unsubscribe();
       detachKeys();
       registerPointerLocker(null);
       controls.removeEventListener("lock", onLock);
@@ -55,40 +63,63 @@ export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group |
     };
   }, [store]);
 
-  // Spawn on entering walk mode and whenever the model (or its unit) changes.
+  const spawn = useCallback(
+    (fromOrbitView: boolean) => {
+      const { camera, scene } = store.getState();
+      if (!(camera instanceof THREE.PerspectiveCamera)) return;
+
+      const key = getModelKey(model);
+      const root = modelRef.current;
+      const collider = root ? getCollider(root, key) : null;
+      colliderRef.current = collider;
+
+      // Entering from Overview: stand where the orbit view was focused, facing the same way.
+      let near: { x: number; z: number } | undefined;
+      let yaw = 0;
+      if (fromOrbitView && orbitView.valid && orbitView.modelKey === key) {
+        near = { x: orbitView.target.x, z: orbitView.target.z };
+        yaw = yawFromDirection(orbitView.target.x - orbitView.position.x, orbitView.target.z - orbitView.position.z);
+      }
+
+      placePlayer(findSpawn(collider, near));
+      camera.rotation.set(0, yaw, 0, "YXZ");
+      eyeY.current = player.position.y + EYE_HEIGHT;
+      camera.position.set(player.position.x, eyeY.current, player.position.z);
+
+      const radius = collider ? Math.max(0.5, 0.5 * collider.bounds.getSize(new THREE.Vector3()).length()) : 5;
+      applyClipPlanes(camera, scene, { near: 0.05, far: viewLimits(radius).far });
+    },
+    [store, modelRef, model],
+  );
+
+  // Entering Walk, or the model/unit changed (then the saved orbit view no longer matches: default spawn).
   useEffect(() => {
-    const { camera, scene } = store.getState();
-    if (!(camera instanceof THREE.PerspectiveCamera)) return;
+    spawn(true);
+  }, [spawn]);
 
-    const root = modelRef.current;
-    const collider = root ? getCollider(root, getModelKey(model)) : null;
-
-    placePlayer(findSpawn(collider));
-    colliderRef.current = collider;
-    eyeY.current = player.position.y + EYE_HEIGHT;
-    camera.rotation.set(0, 0, 0, "YXZ"); // look along -Z, level
-    camera.position.set(player.position.x, player.position.y + EYE_HEIGHT, player.position.z);
-
-    const radius = collider ? Math.max(0.5, 0.5 * collider.bounds.getSize(new THREE.Vector3()).length()) : 5;
-    applyClipPlanes(camera, scene, { near: 0.05, far: viewLimits(radius).far });
-  }, [model, store, modelRef]);
+  // Reset position (button or R): always the default spawn.
+  useEffect(() => {
+    if (handledReset.current === resetTick) return;
+    handledReset.current = resetTick;
+    spawn(false);
+  }, [resetTick, spawn]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, MAX_DT);
     const { camera } = state;
+    const ui = useUiStore.getState();
 
-    if (useUiStore.getState().walkLocked) {
+    if (ui.walkLocked) {
       euler.setFromQuaternion(camera.quaternion, "YXZ");
-      const speed = walkInput.state.run ? RUN_SPEED : WALK_SPEED;
+      const speed = ui.walkSpeed * (walkInput.state.run ? RUN_MULTIPLIER : 1);
       stepVelocity(player.velocity, wishVector(walkInput.state, euler.y), speed, dt);
     } else {
-      player.velocity.x = 0; // keep falling/settling, but don't walk
+      player.velocity.x = 0; // keep settling onto the ground, but don't walk
       player.velocity.z = 0;
     }
 
     stepMover(colliderRef.current, player, dt);
 
-    // Steps move the feet instantly; ease the camera so stairs glide instead of pop.
     eyeY.current = smoothTowards(eyeY.current, player.position.y + EYE_HEIGHT, 18, dt);
     camera.position.set(player.position.x, eyeY.current, player.position.z);
   });

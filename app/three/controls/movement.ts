@@ -1,7 +1,6 @@
 import type { WalkInputState } from "./walkInput";
 
-export const WALK_SPEED = 2.0; // m/s
-export const RUN_SPEED = 4.0;
+export const RUN_MULTIPLIER = 2;
 export const MAX_DT = 0.05; // s: a long frame (tab switch) must not teleport the player
 const SMOOTHING = 14; // 1/s: higher is snappier start and stop
 
@@ -32,4 +31,10 @@ export function stepVelocity(velocity: Vec2, wish: Vec2, speed: number, dt: numb
 /** Eases a value toward a target, frame-rate independent. Softens the camera pop on stairs. */
 export function smoothTowards(current: number, target: number, rate: number, dt: number): number {
   return current + (target - current) * (1 - Math.exp(-rate * dt));
+}
+
+/** Camera yaw that makes "forward" point along the horizontal direction (dx, dz). */
+export function yawFromDirection(dx: number, dz: number): number {
+  if (Math.hypot(dx, dz) < 1e-6) return 0;
+  return Math.atan2(-dx, -dz);
 }

@@ -13,6 +13,7 @@ const WALK_HINTS: Array<[string, string]> = [
   ["W A S D", "Move"],
   ["Shift", "Run"],
   ["Mouse", "Look"],
+  ["R", "Reset position"],
   ["Esc", "Release mouse"],
 ];
 

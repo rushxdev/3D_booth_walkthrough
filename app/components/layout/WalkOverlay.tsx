@@ -7,6 +7,7 @@ const CONTROLS: Array<[string, string]> = [
   ["W A S D or arrows", "Move"],
   ["Shift", "Run"],
   ["Mouse", "Look"],
+  ["R", "Reset position"],
   ["Esc", "Release the mouse"],
 ];
 
