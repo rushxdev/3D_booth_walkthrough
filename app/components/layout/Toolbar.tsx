@@ -1,11 +1,12 @@
 "use client";
 
-import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw } from "lucide-react";
+import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor } from "lucide-react";
 import { IconButton } from "./../../components/ui/IconButton";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { openModelDialog } from "./../../three/loaders/openModelFiles";
 import { SegmentedControl } from "./../../components/ui/SegmentedControls";
 import { isViewMode, useUiStore } from "./../../store/useUiStore";
+import { addScreenInView } from "@/app/three/screens/addScreenInView";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
@@ -23,6 +24,7 @@ export function Toolbar() {
       <IconButton icon={FolderOpen} label="Open model" onClick={openModelDialog} />
       <IconButton icon={Box} label="Load sample" onClick={loadSample} />
       <IconButton icon={X} label="Close model" onClick={clearModel} disabled={!hasModel} />
+      <IconButton icon={Monitor} label="Add screen" onClick={addScreenInView} disabled={!hasModel} />
 
       <div className="flex-1" />
       <IconButton icon={RotateCcw} label="Reset position" shortcut="R" onClick={requestReset} disabled={mode !== "walk"} />

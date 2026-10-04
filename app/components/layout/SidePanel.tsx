@@ -1,4 +1,5 @@
 import { ModelInfo } from "../panels/ModelInfo";
+import { ScreenList } from "../panels/ScreenList";
 import { WalkSettings } from "../panels/WalkSettings";
 
 // SidePanel.tsx
@@ -12,6 +13,7 @@ export function SidePanel() {
         Properties
       </div>
       <WalkSettings />
+      <ScreenList />
       <ModelInfo />
     </aside>
   );
