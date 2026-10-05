@@ -1,3 +1,5 @@
+import type * as THREE from "three";
+
 export const CLICK_SLOP = 4;           // px: a press that moves further is a drag (orbit), not a click
 export const OCCLUSION_EPSILON = 0.02; // m: screens mounted on a wall sit a few mm off it
 
@@ -20,4 +22,14 @@ export function resolvePick(screenHit: ScreenHit | null, modelDistance: number |
   if (modelDistance !== null && modelDistance < screenHit.distance - OCCLUSION_EPSILON) return { kind: "none" };
   if (screenHit.locked) return { kind: "blocked" };
   return { kind: "select", id: screenHit.id };
+}
+
+/** Pointer position to normalized device coordinates (-1..1, y up), for raycasting. */
+export function pointerToNdc(
+  clientX: number,
+  clientY: number,
+  rect: { left: number; top: number; width: number; height: number },
+  out: THREE.Vector2,
+): THREE.Vector2 {
+  return out.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
 }

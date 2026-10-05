@@ -16,6 +16,7 @@ import { CameraTracker } from "../controls/CameraTracker";
 import { BACKGROUND_COLOR } from "./theme";
 import { ScreenPicker } from "../screens/ScreenPicker";
 import { Screens } from "../screens/Screens";
+import { PlacementPreview } from "../screens/PlacementPreview";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 
@@ -59,6 +60,7 @@ export default function SceneCanvas() {
 
       <Screens groupRef={screensRef} />
       <ScreenPicker screensRef={screensRef} modelRef={modelRef} />
+      <PlacementPreview modelRef={modelRef} />
 
       {mode === "overview" ? (
         <OverviewControls modelRef={modelRef} />

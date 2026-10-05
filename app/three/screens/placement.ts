@@ -6,7 +6,7 @@ const e = new THREE.Euler();
 
 /** Moves a position by `distance` meters along the screen's own right axis (Euler XYZ). */
 export function offsetAlongRight(position: Vec3, rotation: Vec3, distance: number): Vec3 {
-  v.set(1, 0, 0).applyEuler(e.set(rotation[0], rotation[1], rotation[2]));
+  v.set(1, 0, 0).applyEuler(e.set(rotation[0], rotation[1], rotation[2], "YXZ"));
   return [position[0] + v.x * distance, position[1] + v.y * distance, position[2] + v.z * distance];
 }
 

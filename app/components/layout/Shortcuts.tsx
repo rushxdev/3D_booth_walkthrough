@@ -15,6 +15,10 @@ export function Shortcuts() {
       const screens = useScreenStore.getState();
       const editing = !ui.walkLocked; 
       const mod = e.ctrlKey || e.metaKey;
+      const selectedScreen = () => {
+      const s = useScreenStore.getState();
+        return s.screens.find((x) => x.id === s.selectedId);
+      };
 
       if (mod && !e.altKey && e.key.toLowerCase() === "d") {
         if (editing && screens.selectedId) {
@@ -45,6 +49,29 @@ export function Shortcuts() {
             e.preventDefault();
             screens.remove(screens.selectedId);
           }
+          break;
+                case "w":
+          if (ui.mode === "overview") {
+            e.preventDefault();
+            ui.setGizmoMode("translate");
+          }
+          break;
+        case "e":
+          if (ui.mode === "overview") {
+            e.preventDefault();
+            ui.setGizmoMode("rotate");
+          }
+          break;
+        case "s": {
+          const selected = selectedScreen();
+          if (ui.mode === "overview" && selected && !selected.locked) {
+            e.preventDefault();
+            ui.setPlacing(!ui.placing);
+          }
+          break;
+        }
+        case "escape":
+          if (ui.placing) ui.setPlacing(false);
           break;
       }
     }

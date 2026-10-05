@@ -14,7 +14,7 @@ export type Screen = {
   id: string;
   name: string;
   position: Vec3; // meters, world space (the center of the screen)
-  rotation: Vec3; // radians, Euler order XYZ; the UI shows degrees
+  rotation: Vec3; // radians, Euler order YXZ (yaw, pitch, roll); the UI shows degrees
   width: number;  // meters
   height: number; // meters
   resolution: [number, number]; // px, informational: never changes the geometry

@@ -18,7 +18,7 @@ type SegmentedControlProps = {
   value: string;
   onValueChange: (value: string) => void;
   options: SegmentOption[];
-  iconOnly?: boolean; // show icons only; label becomes aria-label + tooltip
+  iconOnly?: boolean;
   disabled?: boolean;
   "aria-label": string;
   className?: string;
@@ -37,14 +37,13 @@ export function SegmentedControl({
     <ToggleGroup.Root
       type="single"
       value={value}
-      // Radix single mode lets the user deselect (value ""): ignore that.
       onValueChange={(v) => {
         if (v) onValueChange(v);
       }}
       disabled={disabled}
       {...aria}
       className={cn(
-        "inline-flex h-(--control-h) items-center gap-px rounded-md border border-line bg-surface-2 p-px",
+        "inline-flex h-(--control-h) shrink-0 items-center gap-0.5 rounded-md border border-line bg-surface-2 p-0.5",
         className,
       )}
     >
@@ -54,26 +53,30 @@ export function SegmentedControl({
           <ToggleGroup.Item
             key={o.value}
             value={o.value}
+            disabled={o.disabled}
+            title={o.disabled ? o.hint : undefined}
             aria-label={iconOnly ? o.label : undefined}
             className={cn(
-              "inline-flex h-full min-w-0 items-center justify-center gap-1.5 rounded-sm text-sm text-fg-secondary transition-colors",
-              iconOnly ? "w-6" : "px-2",
+              "inline-flex h-full shrink-0 items-center justify-center gap-1.5 rounded-sm text-sm text-fg-secondary transition-colors",
+              iconOnly ? "h-6 w-6 min-w-6" : "px-2 min-w-0",
               "hover:text-fg data-[state=on]:bg-accent-subtle data-[state=on]:text-accent-text data-[state=on]:hover:text-accent-text",
-              "data-disabled:text-fg-disabled data-disabled:hover:text-fg-disabled",
+              "data-disabled:pointer-events-none data-disabled:text-fg-disabled",
             )}
           >
             {Icon && <Icon size={14} strokeWidth={1.75} aria-hidden />}
             {!iconOnly && <span className="truncate">{o.label}</span>}
-            disabled={o.disabled}
-            title={o.disabled ? o.hint : undefined}
           </ToggleGroup.Item>
         );
-        return iconOnly ? (
+
+        if (!iconOnly) return item;
+
+        return (
           <Tooltip key={o.value} label={o.label} shortcut={o.shortcut}>
-            {item}
+            {/* If your Tooltip wrapper supports asChild, use it. Otherwise a span with flex keeps layout stable */}
+            <span className="inline-flex shrink-0 items-center justify-center">
+              {item}
+            </span>
           </Tooltip>
-        ) : (
-          item
         );
       })}
     </ToggleGroup.Root>

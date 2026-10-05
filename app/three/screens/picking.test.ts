@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createSampleBooth } from "../scene/createSampleBooth";
 import { buildCollider } from "../collision/buildCollider";
-import { isClick, resolvePick } from "./picking";
+import { isClick, pointerToNdc, resolvePick } from "./picking";
 
 describe("isClick", () => {
   it("treats a small movement as a click and a larger one as a drag", () => {
@@ -60,5 +60,17 @@ describe("picking against the sample booth", () => {
     back.rotation.y = Math.PI;
     back.updateMatrixWorld(true);
     expect(click(back)).toEqual({ kind: "none" });
+  });
+});
+
+describe("pointerToNdc", () => {
+  const rect = { left: 100, top: 50, width: 400, height: 200 };
+  it("maps the center to the origin and the corners to +-1, with y pointing up", () => {
+    const v = new THREE.Vector2();
+    pointerToNdc(300, 150, rect, v);
+    expect(v.x).toBeCloseTo(0);
+    expect(v.y).toBeCloseTo(0);
+    expect(pointerToNdc(100, 50, rect, v).toArray()).toEqual([-1, 1]);
+    expect(pointerToNdc(500, 250, rect, v).toArray()).toEqual([1, -1]);
   });
 });
