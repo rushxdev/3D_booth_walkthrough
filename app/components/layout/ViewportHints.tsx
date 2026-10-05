@@ -17,12 +17,19 @@ const WALK_HINTS: Array<[string, string]> = [
   ["Esc", "Release mouse"],
 ];
 
+const PLACING_HINTS: Array<[string, string]> = [
+  ["Click", "Place on surface"],
+  ["Esc", "Cancel"],
+];
+
 export function ViewportHints() {
   const mode = useUiStore((s) => s.mode);
   const locked = useUiStore((s) => s.walkLocked);
+  const placing = useUiStore((s) => s.placing);
+
   if (mode === "walk" && !locked) return null; // the enter overlay already lists the controls
 
-  const hints = mode === "walk" ? WALK_HINTS : OVERVIEW_HINTS;
+  const hints = placing ? PLACING_HINTS : mode === "walk" ? WALK_HINTS : OVERVIEW_HINTS;
   return (
     <div className="pointer-events-none absolute bottom-3 left-3 flex gap-3 rounded-md border border-line bg-surface-1 px-2 py-1 text-xs">
       {hints.map(([key, action]) => (

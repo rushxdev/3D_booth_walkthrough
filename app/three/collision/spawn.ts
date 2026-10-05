@@ -11,6 +11,15 @@ const CLEARANCE = PLAYER_RADIUS + 0.05;
 const INSIDE_PROBE = 3; // a back face this close means the spot is inside a solid
 const CLEARANCE_HEIGHTS = [0.6, 1.3];
 
+type Quality = { frontFloor: boolean; headroom: boolean };
+
+/** Tried in this order for each group of spots. The last level accepts a low ceiling. */
+const QUALITY: Quality[] = [
+  { frontFloor: true, headroom: true },
+  { frontFloor: false, headroom: true },
+  { frontFloor: false, headroom: false },
+];
+
 const DOWN = new THREE.Vector3(0, -1, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 const SIDES = Array.from({ length: 8 }, (_, i) => new THREE.Vector3(Math.cos((i * Math.PI) / 4), 0, Math.sin((i * Math.PI) / 4)));
@@ -23,14 +32,18 @@ function cast(c: Collider, x: number, y: number, z: number, dir: THREE.Vector3) 
   return c.bvh.raycastFirst(ray, THREE.DoubleSide);
 }
 
-/** Floor height if a player can stand at (x, z), else null. `strict` trusts triangle winding. */
-function checkSpot(c: Collider, x: number, z: number, strict: boolean): number | null {
+/**
+ * Floor height if a player can stand at (x, z) at this quality, else null.
+ * frontFloor: the floor triangle must face up (trusts winding); otherwise any winding is accepted.
+ * Standing inside a solid (back faces close by) is rejected at every level.
+ */
+function checkSpot(c: Collider, x: number, z: number, q: Quality): number | null {
   const hit = cast(c, x, c.bounds.min.y + 1, z, DOWN);
   let floorY: number;
   if (hit?.face) {
     normal.copy(hit.face.normal);
-    if (!strict) orientNormal(normal, DOWN);
-    if (classifyNormalY(normal.y) !== "floor") return null; // also rejects starting inside a solid
+    if (!q.frontFloor) orientNormal(normal, DOWN);
+    if (classifyNormalY(normal.y) !== "floor") return null;
     floorY = hit.point.y;
   } else if (GROUND_PLANE_Y !== null) {
     floorY = GROUND_PLANE_Y;
@@ -38,15 +51,17 @@ function checkSpot(c: Collider, x: number, z: number, strict: boolean): number |
     return null;
   }
 
-  const above = cast(c, x, floorY + 0.02, z, UP);
-  if (above && above.distance < PLAYER_HEIGHT - 0.02) return null; // no headroom
+  if (q.headroom) {
+    const above = cast(c, x, floorY + 0.02, z, UP);
+    if (above && above.distance < PLAYER_HEIGHT - 0.02) return null;
+  }
 
   for (const h of CLEARANCE_HEIGHTS) {
     for (const dir of SIDES) {
       const side = cast(c, x, floorY + h, z, dir);
       if (!side?.face) continue;
       if (side.distance < CLEARANCE) return null;
-      if (strict && side.distance < INSIDE_PROBE && side.face.normal.dot(dir) > 0) return null;
+      if (side.distance < INSIDE_PROBE && side.face.normal.dot(dir) > 0) return null; // inside a solid
     }
   }
   return floorY;
@@ -75,15 +90,18 @@ export function findSpawn(collider: Collider | null, near?: { x: number; z: numb
   const cz = near?.z ?? (min.z + max.z) / 2;
   const inside = ([x, z]: [number, number]) => x >= min.x && x <= max.x && z >= min.z && z <= max.z;
 
-  let spots = candidateSpots(cx, cz, Math.max(max.x - min.x, max.z - min.z) / 2 + RING_STEP);
-  if (inside([cx, cz])) spots = [...spots.filter(inside), ...spots.filter((s) => !inside(s))];
+  const spots = candidateSpots(cx, cz, Math.max(max.x - min.x, max.z - min.z) / 2 + RING_STEP);
+  const groups = inside([cx, cz]) ? [spots.filter(inside), spots.filter((s) => !inside(s))] : [spots];
 
-  for (const strict of [true, false]) {
-    for (const [x, z] of spots) {
-      const y = checkSpot(collider, x, z, strict);
-      if (y !== null) return [x, y, z];
+  for (const group of groups) {
+    for (const quality of QUALITY) {
+      for (const [x, z] of group) {
+        const y = checkSpot(collider, x, z, quality);
+        if (y !== null) return [x, y, z];
+      }
     }
   }
+
 
   const hit = cast(collider, cx, min.y + 1, cz, DOWN); // nothing fully valid: best effort
   return [cx, hit ? hit.point.y : min.y, cz];

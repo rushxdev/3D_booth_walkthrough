@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Row } from "./../../components/ui/Row";
 import { Section } from "./../../components/ui/Section";
 import { Select } from "./../../components/ui/Select";
@@ -10,14 +9,7 @@ import type { Unit } from "./../../lib/units";
 import { useSceneStore } from "./../../store/useSceneStore";
 import type { ModelSource } from "./../../store/useSceneStore";
 import { placementFor } from "./../../three/loaders/normalize";
-
-function Value({ children, title }: { children: ReactNode; title?: string }) {
-  return (
-    <span title={title} className="tabular min-w-0 truncate text-right text-sm text-fg">
-      {children}
-    </span>
-  );
-}
+import { Value } from "./../ui/Value";
 
 const UNIT_OPTIONS = UNITS.map((u) => ({ value: u, label: UNIT_LABELS[u] }));
 
