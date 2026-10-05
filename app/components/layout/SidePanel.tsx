@@ -1,5 +1,6 @@
 import { ModelInfo } from "../panels/ModelInfo";
 import { ScreenList } from "../panels/ScreenList";
+import { SizeSection, TransformSection } from "../panels/TransformSection";
 import { WalkSettings } from "../panels/WalkSettings";
 
 // SidePanel.tsx
@@ -12,9 +13,11 @@ export function SidePanel() {
       <div className="flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-secondary">
         Properties
       </div>
-      <WalkSettings />
       <ScreenList />
+      <TransformSection />
+      <SizeSection />
       <ModelInfo />
+      <WalkSettings />
     </aside>
   );
 }

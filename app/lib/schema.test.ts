@@ -42,6 +42,21 @@ describe("sanitizeScreenPatch", () => {
   it("ignores unknown fields such as an id", () => {
     expect(sanitizeScreenPatch({ id: "evil", width: 2 } as ScreenPatch)).toEqual({ width: 2 });
   });
+  
+  it("clamps positions and sanitizes resolution", () => {
+    expect(sanitizeScreenPatch({ position: [5000, -5000, 1] }).position).toEqual([1000, -1000, 1]);
+    expect(sanitizeScreenPatch({ resolution: [1920.4, 99999] }).resolution).toEqual([1920, 16384]);
+    expect(sanitizeScreenPatch({ resolution: [1, 1] }).resolution).toEqual([16, 16]);
+    expect(sanitizeScreenPatch({ resolution: [1920] as unknown as [number, number] })).toEqual({});
+    expect(sanitizeScreenPatch({ resolution: [NaN, 1080] })).toEqual({});
+  });
+
+  it("gives each screen its own default resolution", () => {
+    const a = createScreen("a", "A");
+    const b = createScreen("b", "B");
+    expect(a.resolution).toEqual([1920, 1080]);
+    expect(a.resolution).not.toBe(b.resolution);
+  });
 });
 
 describe("createScreen", () => {

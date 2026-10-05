@@ -2,7 +2,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { isViewMode, useUiStore } from "./useUiStore";
 
 describe("useUiStore", () => {
-  beforeEach(() => useUiStore.setState({ mode: "overview", resetTick: 0, walkLocked: false, walkSpeed: 2, lookSensitivity: 1 }));
+  beforeEach(() => useUiStore.setState({ 
+    mode: "overview", 
+    resetTick: 0, 
+    walkLocked: false, 
+    walkSpeed: 2, 
+    lookSensitivity: 1, 
+    lockAspect: false,
+    gizmoMode: "translate", 
+    snap: false, 
+    placing: false
+   }));
 
   it("switches mode", () => {
     useUiStore.getState().setMode("walk");
@@ -35,5 +45,20 @@ describe("useUiStore", () => {
     expect(useUiStore.getState().walkSpeed).toBe(0.5);
     ui.setLookSensitivity(9);
     expect(useUiStore.getState().lookSensitivity).toBe(3);
+  });
+  it("toggles the aspect lock", () => {
+    useUiStore.getState().setLockAspect(true);
+    expect(useUiStore.getState().lockAspect).toBe(true);
+  });
+  it("switches the gizmo mode and snapping", () => {
+    useUiStore.getState().setGizmoMode("rotate");
+    useUiStore.getState().setSnap(true);
+    expect(useUiStore.getState().gizmoMode).toBe("rotate");
+    expect(useUiStore.getState().snap).toBe(true);
+  });
+  it("ends the Place tool when the mode changes", () => {
+    useUiStore.getState().setPlacing(true);
+    useUiStore.getState().setMode("walk");
+    expect(useUiStore.getState().placing).toBe(false);
   });
 });
