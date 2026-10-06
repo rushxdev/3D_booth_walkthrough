@@ -2,6 +2,7 @@ import { ModelInfo } from "../panels/ModelInfo";
 import { ScreenList } from "../panels/ScreenList";
 import { SizeSection, TransformSection } from "../panels/TransformSection";
 import { WalkSettings } from "../panels/WalkSettings";
+import { ContentSection } from "../panels/ContentSection";
 
 // SidePanel.tsx
 export function SidePanel() {
@@ -16,6 +17,7 @@ export function SidePanel() {
       <ScreenList />
       <TransformSection />
       <SizeSection />
+      <ContentSection />
       <ModelInfo />
       <WalkSettings />
     </aside>
