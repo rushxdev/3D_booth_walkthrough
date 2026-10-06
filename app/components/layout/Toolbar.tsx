@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair } from "lucide-react";
+import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair, Play, Pause } from "lucide-react";
 import { IconButton } from "./../../components/ui/IconButton";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { openModelDialog } from "./../../three/loaders/openModelFiles";
@@ -8,6 +8,10 @@ import { SegmentedControl } from "./../../components/ui/SegmentedControls";
 import { isViewMode, useUiStore, isGizmoMode } from "./../../store/useUiStore";
 import { addScreenInView } from "@/app/three/screens/addScreenInView";
 import { useScreenStore } from "@/app/store/useScreenStore";
+import { useEffect } from "react";
+import { useVideoStore } from "@/app/store/useVideoStore";
+import { pauseAll, playAll } from "@/app/three/screens/Video/videoPlayer";
+import { startVideoSourceSync } from "@/app/three/screens/Video/videoSync";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
@@ -28,6 +32,8 @@ export function Toolbar() {
     return !!selected && !selected.locked;
   });
   const overview = mode === "overview";
+  const anyVideoReady = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready"));
+    useEffect(() => startVideoSourceSync(), []);
 
   return (
     <header className="flex h-(--toolbar-h) shrink-0 items-center gap-1 border-b border-line bg-surface-1 px-3">
@@ -37,6 +43,8 @@ export function Toolbar() {
       <IconButton icon={Box} label="Load sample" onClick={loadSample} />
       <IconButton icon={X} label="Close model" onClick={clearModel} disabled={!hasModel} />
       <IconButton icon={Monitor} label="Add screen" onClick={addScreenInView} disabled={!hasModel} />
+      <IconButton icon={Play} label="Play all videos" onClick={playAll} disabled={!anyVideoReady} />
+      <IconButton icon={Pause} label="Pause all videos" onClick={pauseAll} disabled={!anyVideoReady} />
 
       <div className="mx-1 h-4 w-px bg-line" />
       <SegmentedControl
