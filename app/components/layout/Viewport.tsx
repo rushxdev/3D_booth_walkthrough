@@ -8,6 +8,11 @@ import { ViewportNotice } from "./ViewportNotice";
 import { useFileDrop } from "./useFileDrop";
 import { ViewportHints } from "./ViewportHints";
 import { WalkOverlay } from "./WalkOverlay";
+import { useState } from "react";
+import { ErrorBoundary } from "./../ui/ErrorBoundary";
+import { CanvasFallback } from "./CanvasFallback";
+import { GraphicsNotice } from "./GraphicsNotice";
+import { onCanvasCrash, resetSceneRuntime } from "@/app/runtime/sceneRuntime";
 
 function ViewportMessage({ children }: { children: string }) {
   return (
@@ -35,13 +40,41 @@ function DropOverlay() {
 
 export function Viewport() {
   const hasModel = useSceneStore((s) => s.model !== null);
+  const clearModel = useSceneStore((s) => s.clearModel);
   const { dragging, handlers } = useFileDrop(openModelFiles);
+  const [canvasKey, setCanvasKey] = useState(0);
+
+  // A new key mounts a fresh Canvas, and with it a fresh WebGL context.
+  const reload = () => {
+    resetSceneRuntime();
+    setCanvasKey((k) => k + 1);
+  };
 
   return (
     <main className="relative min-h-0 min-w-0 flex-1 bg-surface-0" {...handlers}>
-      <SceneCanvas />
+      <ErrorBoundary
+        onError={onCanvasCrash}
+        fallback={(error, reset) => (
+          <CanvasFallback
+            error={error}
+            hasModel={hasModel}
+            onReload={() => {
+              reload();
+              reset();
+            }}
+            onCloseModel={() => {
+              clearModel();
+              reload();
+              reset();
+            }}
+          />
+        )}
+      >
+        <SceneCanvas key={canvasKey} />
+      </ErrorBoundary>
       {!hasModel && <EmptyState />}
       <ViewportNotice />
+      <GraphicsNotice onReload={reload} />
       <WalkOverlay />
       <ViewportHints />
       {dragging && <DropOverlay />}

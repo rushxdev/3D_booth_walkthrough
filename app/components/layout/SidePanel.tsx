@@ -4,6 +4,7 @@ import { SizeSection, TransformSection } from "../panels/TransformSection";
 import { WalkSettings } from "../panels/WalkSettings";
 import { ContentSection } from "../panels/ContentSection";
 import { ProjectSection } from "../panels/ProjectSection";
+import { PanelBoundary } from "./PanelBoundary";
 
 // SidePanel.tsx
 export function SidePanel() {
@@ -15,13 +16,13 @@ export function SidePanel() {
       <div className="flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-secondary">
         Properties
       </div>
-      <ScreenList />
-      <TransformSection />
-      <SizeSection />
-      <ContentSection />
-      <ModelInfo />
-      <WalkSettings />
-      <ProjectSection />
+      <PanelBoundary name="Screens"><ScreenList /></PanelBoundary>
+      <PanelBoundary name="Transform"><TransformSection /></PanelBoundary>
+      <PanelBoundary name="Size"><SizeSection /></PanelBoundary>
+      <PanelBoundary name="Content"><ContentSection /></PanelBoundary>
+      <PanelBoundary name="Model"><ModelInfo /></PanelBoundary>
+      <PanelBoundary name="Walk settings"><WalkSettings /></PanelBoundary>
+      <PanelBoundary name="Project"><ProjectSection /></PanelBoundary>
     </aside>
   );
 }
