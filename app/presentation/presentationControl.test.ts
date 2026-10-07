@@ -15,6 +15,9 @@ import {
   startPresentationGuard,
   toggleView,
 } from "./presentationControl";
+import { orbitView, saveOrbitView } from "./../three/controls/orbitView";
+import { takeOrbitResume } from "./cameraResume";
+import * as THREE from "three";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -81,5 +84,28 @@ describe("toggleView", () => {
     expect(useUiStore.getState().mode).toBe("walk");
     toggleView();
     expect(useUiStore.getState().mode).toBe("overview");
+  });
+});
+
+describe("camera resume", () => {
+  it("puts the entry orbit view back, even after the client moved", () => {
+    saveOrbitView(new THREE.Vector3(1, 2, 3), new THREE.Vector3(0, 0, 0), "m", 0);
+    enterPresentation({ fullscreen: false });
+    saveOrbitView(new THREE.Vector3(9, 9, 9), new THREE.Vector3(1, 1, 1), "m", 0); // client orbited
+    exitPresentation();
+    expect(orbitView.position.toArray()).toEqual([1, 2, 3]);
+    expect(takeOrbitResume()?.position).toEqual([1, 2, 3]);
+  });
+
+  it("does not restore onto a different model", () => {
+    saveOrbitView(new THREE.Vector3(1, 2, 3), new THREE.Vector3(0, 0, 0), "m", 0);
+    enterPresentation({ fullscreen: false });
+    saveOrbitView(new THREE.Vector3(9, 9, 9), new THREE.Vector3(1, 1, 1), "m", 0);
+    useSceneStore.setState({
+      model: { kind: "file", name: "x.glb", size: 1, unit: "m" } as never,
+    });
+    exitPresentation();
+    expect(orbitView.position.toArray()).toEqual([9, 9, 9]);
+    expect(takeOrbitResume()).toBeNull();
   });
 });

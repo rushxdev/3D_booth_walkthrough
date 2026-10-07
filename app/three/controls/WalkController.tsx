@@ -19,6 +19,7 @@ import { orbitView } from "./orbitView";
 import { placePlayer, player } from "./player";
 import { registerPointerLocker } from "./walkLock";
 import { walkInput } from "./walkInput";
+import { takeWalkResume } from "./../../presentation/cameraResume";
 
 const euler = new THREE.Euler(0, 0, 0, "YXZ");
 
@@ -108,6 +109,14 @@ export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group |
     const dt = Math.min(delta, MAX_DT);
     const { camera } = state;
     const ui = useUiStore.getState();
+
+    const resume = takeWalkResume();
+    if (resume) {
+      placePlayer(resume.feet);
+      eyeY.current = resume.feet[1] + EYE_HEIGHT;
+      camera.position.set(resume.feet[0], eyeY.current, resume.feet[2]);
+      camera.lookAt(camera.position.x + resume.heading[0], camera.position.y, camera.position.z + resume.heading[1]);
+    }
 
     if (ui.walkLocked) {
       euler.setFromQuaternion(camera.quaternion, "YXZ");

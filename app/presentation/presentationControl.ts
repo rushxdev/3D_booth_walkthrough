@@ -3,11 +3,15 @@ import { useSceneStore } from "./..//store/useSceneStore";
 import { useScreenStore } from "./..//store/useScreenStore";
 import { useUiStore } from "./../store/useUiStore";
 import { playAll } from "./../three/screens/Video/videoPlayer";
+import { modelIdentity } from "./../persistence/modelIdentity";
+import { captureCamera, clearCameraResume, restoreCamera, type CameraSnapshot } from "./cameraResume";
 
 type Mode = ReturnType<typeof useUiStore.getState>["mode"];
 
-/** What to resume on exit. Camera poses join this in Batch 2 (10.6). */
-let entry: { mode: Mode } | null = null;
+/** What to resume on exit: the mode and the camera it was in. */
+let entry: { mode: Mode; camera: CameraSnapshot } | null = null;
+
+const identityKeyNow = () => modelIdentity(useSceneStore.getState().model)?.key ?? "";
 
 /** Returns false (and does nothing) when there is no model to present. */
 export function enterPresentation({ fullscreen }: { fullscreen: boolean }): boolean {
@@ -15,7 +19,8 @@ export function enterPresentation({ fullscreen }: { fullscreen: boolean }): bool
   if (ui.presentation) return true;
   if (!useSceneStore.getState().model) return false;
 
-  entry = { mode: ui.mode };
+  clearCameraResume();
+  entry = { mode: ui.mode, camera: captureCamera(ui.mode, identityKeyNow()) };
   useScreenStore.getState().select(null); // outlines and the gizmo follow the selection
   ui.setPlacing(false);
   ui.setPresentation(true);
@@ -31,8 +36,16 @@ export function exitPresentation(): void {
   const saved = entry;
   entry = null;
   ui.setPresentation(false);
-  const { mode } = useUiStore.getState();
-  if (saved && saved.mode !== mode && useSceneStore.getState().model) ui.setMode(saved.mode);
+  if (saved) {
+    // Before the mode switch: a controller that remounts reads the restored orbitView.
+    restoreCamera(saved.camera, {
+      identityKey: identityKeyNow(),
+      frameTick: useUiStore.getState().frameTick,
+      finalMode: saved.mode,
+    });
+    const { mode } = useUiStore.getState();
+    if (saved.mode !== mode && useSceneStore.getState().model) ui.setMode(saved.mode);
+  }
   void exitFullscreen();
 }
 

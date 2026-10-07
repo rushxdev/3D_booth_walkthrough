@@ -12,6 +12,7 @@ import { measureModel } from "../loaders/normalize";
 import { applyClipPlanes } from "./applyClipPlanes";
 import { DEFAULT_BOUNDS, computeFraming, viewLimits } from "./framing";
 import { canRestoreOrbit, orbitView, saveOrbitView } from "./orbitView";
+import { takeOrbitResume } from "./../../presentation/cameraResume";
 
 const FLOOR_CLEARANCE = 0.1; // meters; the camera never sinks below this
 
@@ -44,6 +45,16 @@ export function OverviewControls({ modelRef }: { modelRef: RefObject<THREE.Group
     }
     controls.update();
   }, [modelKey, frameTick, store, modelRef]);
+
+  // Apply camera pose snapshot if exiting presentation mode
+  useFrame(({ camera }) => {
+    const pose = takeOrbitResume();
+    const controls = controlsRef.current;
+    if (!pose || !controls) return;
+    camera.position.set(...pose.position);
+    controls.target.set(...pose.target);
+    controls.update();
+  });
 
   // Runs after OrbitControls' own update (priority -1).
   useFrame(({ camera }) => {
