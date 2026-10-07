@@ -6,15 +6,15 @@ import { errorIssue } from "./errors";
 let currentLoad = 0;
 
 /** Single entry point for "the user gave us files", from the dialog or a drop. */
-export async function openModelFiles(files: File[]): Promise<void> {
+export async function openModelFiles(files: File[]): Promise<boolean> {
   const primary = files.find((f) => isAllowedExtension(f.name)) ?? files[0];
-  if (!primary) return;
+  if (!primary) return false;
 
   const store = useSceneStore.getState();
   const result = validateModelFile(primary);
   if (!result.ok) {
     store.setIssue(result.error);
-    return;
+    return false;
   }
   store.setIssue(result.warning ?? null);
 
@@ -24,13 +24,13 @@ export async function openModelFiles(files: File[]): Promise<void> {
     // Loaded on demand so three's loaders stay out of the initial shell bundle.
     const { loadModel } = await import("./loadModel");
     const loaded = await loadModel(primary);
-    if (token !== currentLoad) return; // a newer open superseded this one
+    if (token !== currentLoad) return false; // a newer open superseded this one
 
     const s = useSceneStore.getState();
     s.setLoadingName(null);
     if (!loaded.ok) {
       s.setIssue(loaded.error);
-      return;
+      return false;
     }
     s.setModel({
       kind: "file",
@@ -40,13 +40,16 @@ export async function openModelFiles(files: File[]): Promise<void> {
       measure: loaded.measure,
       unit: loaded.unit,
       detectedUnit: loaded.unit,
+      file: primary,
     });
+    return true;
   } catch (err) {
     console.error("[openModelFiles]", err);
-    if (token !== currentLoad) return;
+    if (token !== currentLoad) return false;
     const s = useSceneStore.getState();
     s.setLoadingName(null);
     s.setIssue(errorIssue("unexpected", "Something went wrong", "The model could not be opened. Reload the page and try again."));
+    return false;
   }
 }
 

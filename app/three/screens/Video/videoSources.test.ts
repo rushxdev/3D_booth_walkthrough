@@ -5,6 +5,8 @@ import {
   pruneVideoSources,
   videoSourceCount,
   VIDEO_SRC_PREFIX,
+  getVideoFile,
+  registerVideoSource,
 } from "./videoSources";
 
 let counter = 0;
@@ -21,6 +23,15 @@ afterEach(() => {
 });
 
 describe("videoSources", () => {
+  it("registers a restored file under its old id, once", () => {
+    const f = file();
+    registerVideoSource("video:restored", f);
+    const url = getVideoUrl("video:restored");
+    registerVideoSource("video:restored", file()); // no-op
+    expect(getVideoUrl("video:restored")).toBe(url);
+    expect(getVideoFile("video:restored")).toBe(f);
+  });
+  
   it("registers a file and resolves its url", () => {
     const id = addVideoSource(file());
     expect(id.startsWith(VIDEO_SRC_PREFIX)).toBe(true);

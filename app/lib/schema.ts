@@ -1,4 +1,5 @@
 export const SCHEMA_VERSION = 1 as const;
+export const VIDEO_SRC_PREFIX = "video:" as const;
 
 export type Vec3 = [number, number, number];
 export type ContentType = "none" | "video" | "web";

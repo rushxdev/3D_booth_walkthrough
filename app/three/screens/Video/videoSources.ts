@@ -1,10 +1,15 @@
 import { newId } from "./../../../lib/id";
-
+import { VIDEO_SRC_PREFIX } from "./../../../lib/schema";
 /** Prefix of every video id stored in `content.src`. */
-export const VIDEO_SRC_PREFIX = "video:";
-
+export { VIDEO_SRC_PREFIX };
 type Entry = { file: File; url: string };
 const entries = new Map<string, Entry>();
+
+/** Registers a file under an id it already has (restored from IndexedDB). No-op if present. */
+export function registerVideoSource(id: string, file: File): void {
+  if (entries.has(id)) return;
+  entries.set(id, { file, url: URL.createObjectURL(file) });
+}
 
 /** Registers a picked file and returns the id to store in `content.src`. */
 export function addVideoSource(file: File): string {

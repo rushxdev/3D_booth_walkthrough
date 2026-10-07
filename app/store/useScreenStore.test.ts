@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useScreenStore } from "./useScreenStore";
+import { createScreen } from "./../lib/schema";
 
 const state = () => useScreenStore.getState();
 
@@ -79,5 +80,30 @@ describe("useScreenStore", () => {
     expect(state().selectedId).toBe(id);
     state().select(null);
     expect(state().selectedId).toBeNull();
+  });
+  
+  describe("replaceAll", () => {
+    it("swaps the list and clears the selection", () => {
+      const old = state().add();
+      expect(state().selectedId).toBe(old);
+
+      state().replaceAll([createScreen("x", "X"), createScreen("y", "Y")]);
+      const s = state();
+      expect(s.screens.map((v) => v.id)).toEqual(["x", "y"]);
+      expect(s.selectedId).toBeNull();
+    });
+
+    it("does not alias the input array", () => {
+      const input = [createScreen("x", "X")];
+      state().replaceAll(input);
+      input.push(createScreen("z", "Z"));
+      expect(state().screens).toHaveLength(1);
+    });
+
+    it("accepts an empty list", () => {
+      state().add();
+      state().replaceAll([]);
+      expect(state().screens).toEqual([]);
+    });
   });
 });
