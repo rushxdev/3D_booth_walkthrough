@@ -1,7 +1,6 @@
 import { newId } from "./../../../lib/id";
-
+import { VIDEO_SRC_PREFIX } from "./../../../lib/schema";
 /** Prefix of every video id stored in `content.src`. */
-export const VIDEO_SRC_PREFIX = "video:";
 
 type Entry = { file: File; url: string };
 const entries = new Map<string, Entry>();
