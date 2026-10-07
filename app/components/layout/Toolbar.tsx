@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { useVideoStore } from "@/app/store/useVideoStore";
 import { pauseAll, playAll } from "@/app/three/screens/Video/videoPlayer";
 import { startVideoSourceSync } from "@/app/three/screens/Video/videoSync";
+import { usePersistenceStore } from "@/app/store/usePersistenceStore";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
@@ -34,6 +35,7 @@ export function Toolbar() {
   const overview = mode === "overview";
   const anyVideoReady = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready"));
     useEffect(() => startVideoSourceSync(), []);
+  const restoring = usePersistenceStore((s) => s.restoring);
 
   return (
     <header className="flex h-(--toolbar-h) shrink-0 items-center gap-1 border-b border-line bg-surface-1 px-3">
@@ -42,7 +44,7 @@ export function Toolbar() {
       <IconButton icon={FolderOpen} label="Open model" onClick={openModelDialog} />
       <IconButton icon={Box} label="Load sample" onClick={loadSample} />
       <IconButton icon={X} label="Close model" onClick={clearModel} disabled={!hasModel} />
-      <IconButton icon={Monitor} label="Add screen" onClick={addScreenInView} disabled={!hasModel} />
+      <IconButton icon={Monitor} label="Add screen" onClick={addScreenInView} disabled={!hasModel || restoring} />
       <IconButton icon={Play} label="Play all videos" onClick={playAll} disabled={!anyVideoReady} />
       <IconButton icon={Pause} label="Pause all videos" onClick={pauseAll} disabled={!anyVideoReady} />
 

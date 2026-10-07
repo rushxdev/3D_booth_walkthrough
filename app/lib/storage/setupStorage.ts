@@ -3,6 +3,7 @@ import type { SceneSetup } from "../schema";
 import { classifyStorageError, STORAGE_MESSAGES, type StorageFailure } from "./storageErrors";
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export type IterableStorage = StorageLike & Pick<Storage, "key" | "length">;
 
 export const SETUP_PREFIX = "booth:setup:";
 export const LAST_SESSION_KEY = "booth:last-session";
@@ -20,7 +21,7 @@ const saveFailure = (error: unknown): SaveResult => {
 };
 
 /** localStorage if it works at all, else null. A full disk still counts as working. */
-export function getLocalStorage(): StorageLike | null {
+export function getLocalStorage(): IterableStorage | null {
   try {
     if (typeof window === "undefined") return null;
     const storage = window.localStorage;
@@ -34,6 +35,21 @@ export function getLocalStorage(): StorageLike | null {
   } catch {
     return null;
   }
+}
+
+/** Model keys that have a saved setup. */
+export function listSetupKeys(storage: IterableStorage | null): string[] {
+  if (!storage) return [];
+  const out: string[] = [];
+  try {
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (k?.startsWith(SETUP_PREFIX)) out.push(k.slice(SETUP_PREFIX.length));
+    }
+  } catch {
+    /* unreadable storage: report none */
+  }
+  return out;
 }
 
 export function saveSetup(storage: StorageLike | null, modelKey: string, setup: SceneSetup): SaveResult {

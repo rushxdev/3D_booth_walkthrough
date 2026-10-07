@@ -13,7 +13,8 @@ export type ModelSource =
       scene: Group;
       measure: ModelMeasure;
       unit: Unit;          // what the user (or the guess) says the file uses
-      detectedUnit: Unit;  // the original guess, kept so the panel can show it
+      detectedUnit: Unit;
+      file?: File;  // the original guess, kept so the panel can show it
     };
 
 type SceneState = {

@@ -29,4 +29,13 @@ describe("usePersistenceStore", () => {
     s.setNotice(null);
     expect(usePersistenceStore.getState().notice).toBeNull();
   });
+
+  it("pausing survives errors, and resuming clears them", () => {
+    const s = usePersistenceStore.getState();
+    s.markError("full");
+    s.pauseSaving();
+    expect(usePersistenceStore.getState().savingPaused).toBe(true);
+    s.resumeSaving();
+    expect(usePersistenceStore.getState()).toMatchObject({ savingPaused: false, saveState: "idle", errorMessage: null });
+  });
 });

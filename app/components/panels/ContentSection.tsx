@@ -83,8 +83,8 @@ function ContentBody({ screen }: { screen: Screen }) {
         <>
           <Row label="File">
             <div className="flex min-w-0 items-center justify-end gap-1">
-              <Value>{file ? `${file.name} (${formatBytes(file.size)})` : "No file"}</Value>
-              <IconButton icon={FolderOpen} label={src ? "Replace video" : "Choose video"} onClick={chooseFile} disabled={locked} />
+              <Value>{file ? `${file.name} (${formatBytes(file.size)})` : src ? "Content missing" : "No file"}</Value>
+              <IconButton icon={FolderOpen} label={!src ? "Choose video" : file ? "Replace video" : "Relink video"} onClick={chooseFile} disabled={locked} />
               {src && <IconButton icon={Trash2} label="Remove video" onClick={remove} disabled={locked} />}
             </div>
           </Row>
@@ -129,13 +129,13 @@ function ContentBody({ screen }: { screen: Screen }) {
           )}
 
           {src && !ready && !message && (
-            <p className="px-3 py-1 text-xs text-fg-muted">Loading video…</p>
+            <p className="px-3 py-1 text-xs text-fg-secondary">Loading video…</p>
           )}
         </>
       )}
 
       {message && (
-        <p role="alert" className={`px-3 py-1 text-xs ${isError ? "text-danger" : "text-fg-muted"}`}>
+        <p role="alert" className={`px-3 py-1 text-xs ${isError ? "text-danger" : "text-fg-secondary"}`}>
           {message}
         </p>
       )}

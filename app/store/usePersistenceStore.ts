@@ -4,21 +4,31 @@ export type SaveState = "idle" | "saved" | "error";
 
 type PersistenceState = {
   saveState: SaveState;
-  /** Why saving is failing, shown with a continue-without-saving path. */
+  /** Why saving is failing. */
   errorMessage: string | null;
-  /** One-time "Restored previous session" line. */
+  /** One-line status such as "Restored previous session". */
   notice: string | null;
-  /** True while the startup restore runs, so autosave never overwrites what is about to load. */
+  /** True while a model's setup is being loaded. */
   restoring: boolean;
+  /** "Continue without saving": autosave is skipped for this session. */
+  savingPaused: boolean;
 
   markSaved: () => void;
   markError: (message: string) => void;
   setNotice: (notice: string | null) => void;
   setRestoring: (restoring: boolean) => void;
+  pauseSaving: () => void;
+  resumeSaving: () => void;
   reset: () => void;
 };
 
-const initial = { saveState: "idle" as SaveState, errorMessage: null, notice: null, restoring: false };
+const initial = {
+  saveState: "idle" as SaveState,
+  errorMessage: null,
+  notice: null,
+  restoring: false,
+  savingPaused: false,
+};
 
 /** Runtime state only. Never saved or exported. */
 export const usePersistenceStore = create<PersistenceState>((set) => ({
@@ -27,5 +37,7 @@ export const usePersistenceStore = create<PersistenceState>((set) => ({
   markError: (errorMessage) => set({ saveState: "error", errorMessage }),
   setNotice: (notice) => set({ notice }),
   setRestoring: (restoring) => set({ restoring }),
+  pauseSaving: () => set({ savingPaused: true }),
+  resumeSaving: () => set({ savingPaused: false, saveState: "idle", errorMessage: null }),
   reset: () => set({ ...initial }),
 }));
