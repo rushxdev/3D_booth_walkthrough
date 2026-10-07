@@ -93,5 +93,6 @@ export function registerPlayer(screenId: string, player: VideoPlayer): () => voi
 }
 
 export const getPlayer = (screenId: string) => players.get(screenId);
+export const playerIds = () => [...players.keys()];
 export const playAll = () => players.forEach((p) => void p.play());
 export const pauseAll = () => players.forEach((p) => p.pause());

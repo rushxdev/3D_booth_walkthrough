@@ -31,6 +31,8 @@ import { useScreenStore } from "@/app/store/useScreenStore";
 import { openModelFiles } from "@/app/three/loaders/openModelFiles";
 import { getVideoFile, registerVideoSource } from "./../three/screens/Video/videoSources";
 import { modelIdentity, type ModelIdentity } from "./modelIdentity";
+import { wantsPresentation } from "@/app/lib/presentParam";
+import { enterPresentation } from "@/app/presentation/presentationControl";
 
 const SAVE_DELAY_MS = 300;
 const MODEL_BLOB_PREFIX = modelBlobKey("");
@@ -259,9 +261,14 @@ export function startPersistence(): () => void {
   document.addEventListener("visibilitychange", onVisibility);
 
   if (!restoreStarted) {
-    restoreStarted = true;
-    void restoreLastSession();
-  }
+  restoreStarted = true;
+  void restoreLastSession().then(() => {
+    if (!wantsPresentation(window.location.search)) return;
+    // No gesture, so no fullscreen: the bar offers it.
+    if (!enterPresentation({ fullscreen: false })) {
+      pstore().setNotice("Nothing to present yet: open a model first.");
+    }
+  });}
 
   return () => {
     stopModel();

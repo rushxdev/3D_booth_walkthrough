@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair, Play, Pause } from "lucide-react";
+import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair, Play, Pause, Presentation } from "lucide-react";
 import { IconButton } from "./../../components/ui/IconButton";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { openModelDialog } from "./../../three/loaders/openModelFiles";
@@ -8,11 +8,10 @@ import { SegmentedControl } from "./../../components/ui/SegmentedControls";
 import { isViewMode, useUiStore, isGizmoMode } from "./../../store/useUiStore";
 import { addScreenInView } from "@/app/three/screens/addScreenInView";
 import { useScreenStore } from "@/app/store/useScreenStore";
-import { useEffect } from "react";
 import { useVideoStore } from "@/app/store/useVideoStore";
 import { pauseAll, playAll } from "@/app/three/screens/Video/videoPlayer";
-import { startVideoSourceSync } from "@/app/three/screens/Video/videoSync";
 import { usePersistenceStore } from "@/app/store/usePersistenceStore";
+import { togglePresentation } from "@/app/presentation/presentationControl";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
@@ -34,7 +33,6 @@ export function Toolbar() {
   });
   const overview = mode === "overview";
   const anyVideoReady = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready"));
-    useEffect(() => startVideoSourceSync(), []);
   const restoring = usePersistenceStore((s) => s.restoring);
 
   return (
@@ -60,7 +58,13 @@ export function Toolbar() {
           { value: "rotate", label: "Rotate", icon: Rotate3d, shortcut: "E" },
         ]}
       />
-      <IconButton icon={Magnet} label="Snap to 5 cm and 5°" active={snap} disabled={!overview} onClick={() => setSnap(!snap)} />
+      <IconButton 
+        icon={Magnet} 
+        label="Snap to 5 cm and 5°" 
+        active={snap} 
+        disabled={!overview} 
+        onClick={() => setSnap(!snap)} 
+      />
       <IconButton
         icon={Crosshair}
         label="Place on surface"
@@ -71,8 +75,27 @@ export function Toolbar() {
       />
 
       <div className="flex-1" />
-      <IconButton icon={RotateCcw} label="Reset position" shortcut="R" onClick={requestReset} disabled={mode !== "walk"} />
-      <IconButton icon={Maximize} label="Frame model" shortcut="F" onClick={requestFrame} disabled={mode !== "overview"} />
+      <IconButton 
+        icon={RotateCcw} 
+        label="Reset position" 
+        shortcut="R" 
+        onClick={requestReset} 
+        disabled={mode !== "walk"} 
+      />
+      <IconButton
+        icon={Presentation}
+        label="Presentation mode"
+        shortcut="P"
+        disabled={!hasModel}
+        onClick={() => togglePresentation({ fullscreen: true })}
+      />
+      <IconButton 
+        icon={Maximize} 
+        label="Frame model" 
+        shortcut="F" 
+        onClick={requestFrame} 
+        disabled={mode !== "overview"} 
+      />
       <SegmentedControl
         aria-label="Camera mode"
         value={mode}

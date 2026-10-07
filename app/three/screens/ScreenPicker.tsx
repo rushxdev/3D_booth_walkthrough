@@ -13,6 +13,7 @@ import { gizmo } from "./gizmoState";
 import { isClick, pointerToNdc, resolvePick } from "./picking";
 import type { ScreenHit } from "./picking";
 import { poseOnSurface } from "./surfacePlacement";
+import { isPresenting } from "@/app/presentation/usePresenting";
 
 type Props = {
   screensRef: RefObject<THREE.Group | null>;
@@ -79,6 +80,7 @@ export function ScreenPicker({ screensRef, modelRef }: Props) {
       down = e.button === 0 && !gizmo.controls?.axis ? { x: e.clientX, y: e.clientY } : null;
     };
     const onUp = (e: PointerEvent) => {
+      if (isPresenting()) return;
       const start = down;
       down = null;
       if (!start || e.button !== 0) return;

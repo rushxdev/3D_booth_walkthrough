@@ -13,18 +13,20 @@ import { pointerToNdc } from "./picking";
 import { ACCENT_COLOR } from "../scene/theme";
 import { poseOnSurface } from "./surfacePlacement";
 import type { Pose } from "./surfacePlacement";
+import { usePresenting } from "@/app/presentation/usePresenting";
 
 const OUTLINE_POINTS = new Float32Array([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0]);
 
 /** Shows where the selected screen would land under the pointer. Reads and writes no React state. */
 export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group | null> }) {
+  const presenting = usePresenting();
   const store = useStore();
   const placing = useUiStore((s) => s.placing);
   const group = useRef<THREE.Group>(null);
   const pose = useRef<Pose | null>(null);
 
   useEffect(() => {
-    if (!placing) return;
+    if (!placing || presenting) return;
     const element = store.getState().gl.domElement;
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -54,7 +56,7 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
       pose.current = null;
       if (group.current) group.current.visible = false;
     };
-  }, [placing, store, modelRef]);
+  }, [placing, presenting, store, modelRef]);
 
   useFrame(() => {
     const g = group.current;
@@ -71,6 +73,8 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
     g.rotation.set(...p.rotation);
     g.scale.set(selected.width, selected.height, 1);
   });
+
+  if (presenting) return null;
 
   return (
     <group ref={group} visible={false} rotation-order="YXZ">
