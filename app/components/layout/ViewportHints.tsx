@@ -1,6 +1,7 @@
 "use client";
 
 import { useUiStore } from "./../../store/useUiStore";
+import { usePresenting } from "@/app/presentation/usePresenting";
 
 const OVERVIEW_HINTS: Array<[string, string]> = [
   ["Left drag", "Rotate"],
@@ -26,7 +27,9 @@ export function ViewportHints() {
   const mode = useUiStore((s) => s.mode);
   const locked = useUiStore((s) => s.walkLocked);
   const placing = useUiStore((s) => s.placing);
+  const presenting = usePresenting();
 
+  if (presenting) return null;
   if (mode === "walk" && !locked) return null; // the enter overlay already lists the controls
 
   const hints = placing ? PLACING_HINTS : mode === "walk" ? WALK_HINTS : OVERVIEW_HINTS;

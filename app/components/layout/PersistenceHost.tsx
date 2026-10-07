@@ -6,6 +6,7 @@ import { Button } from "./../../components/ui/Button";
 import { IconButton } from "./../../components/ui/IconButton";
 import { usePersistenceStore } from "@/app/store/usePersistenceStore";
 import { exportSetup, startPersistence } from "@/app/persistence/session";
+import { usePresenting } from "@/app/presentation/usePresenting";
 
 const NOTICE_MS = 6000;
 
@@ -17,6 +18,7 @@ export function PersistenceHost() {
   const notice = usePersistenceStore((s) => s.notice);
   const setNotice = usePersistenceStore((s) => s.setNotice);
   const pauseSaving = usePersistenceStore((s) => s.pauseSaving);
+  const presenting = usePresenting();
 
   useEffect(() => startPersistence(), []);
 
@@ -28,7 +30,7 @@ export function PersistenceHost() {
 
   const isError = saveState === "error" && !paused && !!errorMessage;
   const text = isError ? errorMessage : notice;
-  if (!text) return null;
+  if (presenting || !text) return null;
 
   return (
     <div

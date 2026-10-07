@@ -23,6 +23,7 @@ type UiState = {
   gizmoMode: GizmoMode;
   snap: boolean;       // snap gizmo moves to 5 cm and rotations to 5 degrees
   placing: boolean;    // the Place on surface tool is active
+  presentation: boolean;
   setMode: (mode: ViewMode) => void;
   requestFrame: () => void;
   requestReset: () => void;
@@ -33,6 +34,7 @@ type UiState = {
   setGizmoMode: (mode: GizmoMode) => void;
   setSnap: (snap: boolean) => void;
   setPlacing: (placing: boolean) => void;
+  setPresentation: (on: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -46,6 +48,7 @@ export const useUiStore = create<UiState>()((set) => ({
   gizmoMode: "translate",
   snap: false,
   placing: false,
+  presentation: false,
   setMode: (mode) => set({ mode, placing: false }), // the Place tool is an Overview tool
   requestFrame: () => set((s) => ({ frameTick: s.frameTick + 1 })),
   requestReset: () => set((s) => ({ resetTick: s.resetTick + 1 })),
@@ -57,4 +60,5 @@ export const useUiStore = create<UiState>()((set) => ({
   setGizmoMode: (gizmoMode) => set({ gizmoMode }),
   setSnap: (snap) => set({ snap }),
   setPlacing: (placing) => set({ placing }),
+  setPresentation: (presentation) => set(presentation ? { presentation, placing: false } : { presentation }),
 }));
