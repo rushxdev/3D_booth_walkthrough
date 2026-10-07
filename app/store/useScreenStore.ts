@@ -16,6 +16,7 @@ type ScreenState = {
   remove: (id: string) => void;
   duplicate: (id: string) => string | null;
   select: (id: string | null) => void;
+  replaceAll: (screens: Screen[]) => void;
 };
 
 export const useScreenStore = create<ScreenState>()((set, get) => ({
@@ -68,5 +69,14 @@ export const useScreenStore = create<ScreenState>()((set, get) => ({
     return copy.id;
   },
 
-  select: (id) => set((s) => (id === null || s.screens.some((x) => x.id === id) ? { selectedId: id } : s)),
+  replaceAll: (screens) => 
+    set({ 
+      screens: screens.slice(), 
+      selectedId: null 
+    }),
+
+  select: (id) => 
+    set((s) => (
+      id === null || s.screens.some((x) => 
+        x.id === id) ? { selectedId: id } : s)),
 }));
