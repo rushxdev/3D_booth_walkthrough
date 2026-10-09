@@ -18,6 +18,7 @@ import { ScreenPicker } from "../screens/ScreenPicker";
 import { Screens } from "../screens/Screens";
 import { PlacementPreview } from "../screens/PlacementPreview";
 import { usePresenting } from "@/app/presentation/usePresenting";
+import { ContextWatcher } from "./ContextWatcher";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 
@@ -51,6 +52,7 @@ export default function SceneCanvas() {
       <fog attach="fog" args={[BACKGROUND_COLOR, 80, 220]} />
 
       <Lighting />
+      <ContextWatcher />
       < CameraTracker />
       <Floor showGrid={!presenting} />
       <group ref={modelRef}>

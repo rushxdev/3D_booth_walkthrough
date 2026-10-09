@@ -8,6 +8,13 @@ import { ViewportNotice } from "./ViewportNotice";
 import { useFileDrop } from "./useFileDrop";
 import { ViewportHints } from "./ViewportHints";
 import { WalkOverlay } from "./WalkOverlay";
+import { useState } from "react";
+import { ErrorBoundary } from "./../ui/ErrorBoundary";
+import { CanvasFallback } from "./CanvasFallback";
+import { GraphicsNotice } from "./GraphicsNotice";
+import { onCanvasCrash, resetSceneRuntime } from "./../../runtime/sceneRuntime";
+import { useEffect } from "react";   // alongside useState
+import { useFaultStore } from "./../../store/useFaultStore";
 
 function ViewportMessage({ children }: { children: string }) {
   return (
@@ -35,13 +42,59 @@ function DropOverlay() {
 
 export function Viewport() {
   const hasModel = useSceneStore((s) => s.model !== null);
+  const clearModel = useSceneStore((s) => s.clearModel);
   const { dragging, handlers } = useFileDrop(openModelFiles);
+  const [canvasKey, setCanvasKey] = useState(0);
+  const fault = useFaultStore((s) => s.fault);
+
+  // A per-frame failure never reaches the error boundary, so it gets the same recovery here.
+  useEffect(() => {
+    if (fault) onCanvasCrash();
+  }, [fault])
+
+  // A new key mounts a fresh Canvas, and with it a fresh WebGL context.
+  const reload = () => {
+    resetSceneRuntime();
+    setCanvasKey((k) => k + 1);
+  };
 
   return (
-    <main className="relative min-h-0 min-w-0 flex-1 bg-surface-0" {...handlers}>
-      <SceneCanvas />
+    <main aria-label="3D Viewport" className="relative min-h-0 min-w-0 flex-1 bg-surface-0" {...handlers}>
+      {fault ? (
+        <CanvasFallback
+          error={fault.error}
+          hasModel={hasModel}
+          onReload={reload}
+          onCloseModel={() => {
+            clearModel();
+            reload();
+          }}
+        />
+      ) : (
+        <ErrorBoundary
+          onError={onCanvasCrash}
+          fallback={(error, reset) => (
+            <CanvasFallback
+              error={error}
+              hasModel={hasModel}
+              onReload={() => {
+                reload();
+                reset();
+              }}
+              onCloseModel={() => {
+                clearModel();
+                reload();
+                reset();
+              }}
+            />
+          )}
+        >
+          <SceneCanvas key={canvasKey} />
+        </ErrorBoundary>
+      )}
       {!hasModel && <EmptyState />}
       <ViewportNotice />
+      <GraphicsNotice onReload={reload} />
       <WalkOverlay />
       <ViewportHints />
       {dragging && <DropOverlay />}

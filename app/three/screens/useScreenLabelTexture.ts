@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { SCREEN_EMPTY_COLOR } from "../scene/theme";
 import { labelCanvasSize, screenLabelLines } from "./screenLabel";
@@ -52,17 +52,10 @@ export function useScreenLabelTexture(
   height: number,
   enabled: boolean,
 ): THREE.CanvasTexture | null {
-  const [texture, setTexture] = useState<THREE.CanvasTexture | null>(null);
-
-  useEffect(() => {
-    if (!enabled) return;
-    const t = createLabelTexture(name, width, height);
-    setTexture(t);
-    return () => {
-      t.dispose();
-      setTexture((cur) => (cur === t ? null : cur));
-    };
-  }, [name, width, height, enabled]);
-
-  return enabled ? texture : null;
+  const texture = useMemo(
+    () => (enabled ? createLabelTexture(name, width, height) : null),
+    [name, width, height, enabled],
+  );
+  useEffect(() => () => texture?.dispose(), [texture]);
+  return texture;
 }

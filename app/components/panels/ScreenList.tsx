@@ -51,11 +51,31 @@ function RenameInput({ initial, onCommit, onCancel }: { initial: string; onCommi
   );
 }
 
+const ROW_BUTTON = "button[data-row]";
+
 function ScreenRow({ screen, selected }: { screen: Screen; selected: boolean }) {
   const select = useScreenStore((s) => s.select);
   const update = useScreenStore((s) => s.update);
   const remove = useScreenStore((s) => s.remove);
   const [renaming, setRenaming] = useState(false);
+
+  /** Arrow keys move focus to the neighbouring row and select it, like a list box. */
+  const focusSibling = (from: HTMLElement, dir: 1 | -1) => {
+  const li = from.closest("li");
+  const sibling = dir === 1 ? li?.nextElementSibling : li?.previousElementSibling;
+  const button = sibling?.querySelector<HTMLButtonElement>(ROW_BUTTON);
+    if (!button) return;
+    button.focus();
+    if (button.dataset.screenId) select(button.dataset.screenId);
+  };
+
+  /** Deleting removes the focused element, so hand focus to a neighbour first. */
+  const removeKeepingFocus = (from: HTMLElement) => {
+    const li = from.closest("li");
+    const neighbour = (li?.nextElementSibling ?? li?.previousElementSibling)?.querySelector<HTMLElement>(ROW_BUTTON);
+    (neighbour ?? document.querySelector<HTMLElement>('aside [aria-label^="Add screen"]'))?.focus();
+    remove(screen.id);
+  };
 
   return (
     <li className={cn("flex h-7 items-center gap-0.5 rounded-md pr-0.5 pl-1 transition-colors", selected ? "bg-accent-subtle" : "hover:bg-surface-2")}>
@@ -71,6 +91,8 @@ function ScreenRow({ screen, selected }: { screen: Screen; selected: boolean }) 
       ) : (
         <button
           type="button"
+          data-row
+          data-screen-id={screen.id}
           aria-current={selected || undefined}
           title="Double-click or press F2 to rename"
           onClick={() => select(screen.id)}
@@ -79,11 +101,17 @@ function ScreenRow({ screen, selected }: { screen: Screen; selected: boolean }) 
             if (e.key === "F2") {
               e.preventDefault();
               setRenaming(true);
+            } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+              e.preventDefault();
+              focusSibling(e.currentTarget, e.key === "ArrowDown" ? 1 : -1);
+            } else if ((e.key === "Delete" || e.key === "Backspace") && selected) {
+              e.preventDefault();
+              removeKeepingFocus(e.currentTarget);
             }
           }}
           className={cn(
             "flex h-full min-w-0 flex-1 items-center rounded-sm text-left text-sm",
-            selected ? "text-accent-text" : screen.visible ? "text-fg" : "text-fg-disabled",
+            selected ? "text-accent-text" : screen.visible ? "text-fg" : "text-fg-secondary italic",
           )}
         >
           <span className="truncate">{screen.name}</span>
@@ -91,11 +119,17 @@ function ScreenRow({ screen, selected }: { screen: Screen; selected: boolean }) 
       )}
       <IconButton
         icon={screen.visible ? Eye : EyeOff}
-        label={screen.visible ? "Hide screen" : "Show screen"}
+        label={`${screen.visible ? "Hide" : "Show"} ${screen.name}`}
         size="sm"
         onClick={() => update(screen.id, { visible: !screen.visible })}
       />
-      <IconButton icon={Trash2} label="Delete screen" shortcut="Del" size="sm" onClick={() => remove(screen.id)} />
+      <IconButton
+        icon={Trash2}
+        label={`Delete ${screen.name}`}
+        shortcut="Del"
+        size="sm"
+        onClick={(e) => removeKeepingFocus(e.currentTarget)}
+      />
     </li>
   );
 }
@@ -134,7 +168,7 @@ export function ScreenList() {
       {screens.length === 0 ? (
         <div className="flex flex-col items-start gap-2">
           <p className="text-sm text-fg-secondary">No screens yet.</p>
-          <Button icon={Plus} disabled={!hasModel} onClick={addScreenInView}>
+          <Button icon={Plus} disabled={!hasModel}  disabledHint="Load a model first" onClick={addScreenInView}>
             Add screen
           </Button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Footprints, Maximize, Minimize, Orbit, Volume2, VolumeX, X } from "lucide-react";
 import { IconButton } from "@/app/components/ui/IconButton";
 import { SegmentedControl } from "@/app/components/ui/SegmentedControls";
@@ -22,9 +22,23 @@ export function PresentationBar() {
   const anyVideo = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready"));
   const anySound = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready" && !v.muted));
 
+  const subscribeFullscreen = (cb: () => void) => {
+    document.addEventListener("fullscreenchange", cb);
+    return () => document.removeEventListener("fullscreenchange", cb);
+  };
+
+  const noSubscribe = () => () => {};
   const [awake, setAwake] = useState(true);
-  const [fs, setFs] = useState(false);
-  const [fsOk, setFsOk] = useState(false);
+  const fs = useSyncExternalStore(
+    subscribeFullscreen,
+    () => !!document.fullscreenElement,
+    () => false
+  );
+  const fsOk = useSyncExternalStore(
+    noSubscribe,
+    () => fullscreenSupported(),
+    () => false
+  );
 
   // Fade in on pointer movement, out after a pause.
   useEffect(() => {
@@ -44,14 +58,6 @@ export function PresentationBar() {
       document.removeEventListener("pointerdown", wake);
     };
   }, [presenting, walkLocked]);
-
-  useEffect(() => {
-    setFsOk(fullscreenSupported());
-    const sync = () => setFs(!!document.fullscreenElement);
-    sync();
-    document.addEventListener("fullscreenchange", sync);
-    return () => document.removeEventListener("fullscreenchange", sync);
-  }, []);
 
   if (!presenting) return null;
   const visible = awake && !walkLocked; // mouse-look would keep waking it

@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/app/lib/fullscreen", () => ({
+vi.mock("./../lib/fullscreen", () => ({
   enterFullscreen: vi.fn(async () => ({ ok: true })),
   exitFullscreen: vi.fn(async () => ({ ok: true })),
 }));
 
-import { enterFullscreen, exitFullscreen } from "@/app/lib/fullscreen";
+import { enterFullscreen, exitFullscreen } from "./../lib/fullscreen";
 import { useSceneStore } from "./../store/useSceneStore";
 import { useScreenStore } from "./..//store/useScreenStore";
 import { useUiStore } from "./..//store/useUiStore";

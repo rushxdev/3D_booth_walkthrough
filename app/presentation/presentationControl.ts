@@ -1,4 +1,4 @@
-import { exitFullscreen, enterFullscreen } from "@/app/lib/fullscreen";
+import { exitFullscreen, enterFullscreen } from "./../lib/fullscreen";
 import { useSceneStore } from "./..//store/useSceneStore";
 import { useScreenStore } from "./..//store/useScreenStore";
 import { useUiStore } from "./../store/useUiStore";

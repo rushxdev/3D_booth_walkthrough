@@ -15,22 +15,53 @@ import { ModelMeasure } from "./normalize";
 import type { Unit } from "./../../lib/units";
 import { guessUnit } from "./../../lib/units";
 import { largestDimension, measureModel } from "./normalize";
+import { readBlob } from "./readFile";
 
 export type LoadResult =
   | { ok: true; scene: THREE.Group; measure: ModelMeasure; unit: Unit }
   | { ok: false; error: LoadIssue };
 
+export type LoadHooks = {
+  onProgress?: (fraction: number) => void;
+  /** Reading is done; parsing has no progress to report. */
+  onProcessing?: () => void;
+  shouldCancel?: () => boolean;
+};
+
 const fail = (error: LoadIssue): LoadResult => ({ ok: false, error });
 
+const cancelled = () => fail(errorIssue("cancelled", "Loading cancelled", "A newer file was opened."));
+
+function readFailure(reason: "cancelled" | "memory" | "read"): LoadResult {
+  if (reason === "cancelled") return cancelled();
+  if (reason === "memory") {
+    return fail(
+      errorIssue(
+        "out-of-memory",
+        "Not enough memory",
+        "The browser ran out of memory reading this file. Close other tabs, or export a smaller model (Draco and KTX2 compression help).",
+      ),
+    );
+  }
+  return fail(
+    errorIssue(
+      "read-failed",
+      "Couldn't read the file",
+      "The browser could not read this file. It may have been moved, deleted or changed. Select it again.",
+    ),
+  );
+}
+
 /** Never throws: every failure comes back as { ok: false, error }. */
-export async function loadModel(file: File): Promise<LoadResult> {
+export async function loadModel(file: File, hooks: LoadHooks = {}): Promise<LoadResult> {
   try {
-    let buffer: ArrayBuffer;
-    try {
-      buffer = await file.arrayBuffer();
-    } catch {
-      return fail(errorIssue("read-failed", "Couldn't read the file", "The browser could not read this file. It may have been moved or deleted. Select it again."));
-    }
+    const read = await readBlob(file, { onProgress: hooks.onProgress, shouldCancel: hooks.shouldCancel });
+    if (!read.ok) return readFailure(read.reason);
+    const buffer = read.buffer;
+
+    hooks.onProcessing?.();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0)); // let "Processing" paint first
+    if (hooks.shouldCancel?.()) return cancelled();
 
     // Decide by content, not by extension.
     let input: ArrayBuffer | string;

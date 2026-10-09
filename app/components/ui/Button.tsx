@@ -5,21 +5,30 @@ import { cn } from "./../../lib/cn";
 type ButtonProps = ComponentProps<"button"> & {
   variant?: "default" | "primary";
   icon?: LucideIcon;
+  /** Shown as a tooltip while disabled, so the button explains itself. */
+  disabledHint?: string;
 };
 
 export function Button({
   variant = "default",
   icon: Icon,
-  disabled,
+  disabled = false,
+  disabledHint,
   className,
   children,
   type = "button",
+  onClick,
+  title,
   ...rest
 }: ButtonProps) {
+  // aria-disabled instead of disabled: it stays focusable and hoverable, so the hint can show
+  // (same approach as IconButton). The click is simply not wired up.
   return (
     <button
       type={type}
-      disabled={disabled}
+      aria-disabled={disabled || undefined}
+      title={disabled ? disabledHint : title}
+      onClick={disabled ? undefined : onClick}
       className={cn(
         "inline-flex h-(--control-h) shrink-0 items-center justify-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors",
         disabled

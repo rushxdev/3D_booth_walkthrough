@@ -33,7 +33,7 @@ export function Select({
         id={id}
         {...aria}
         className={cn(
-          "flex h-(--control-h) w-full min-w-0 items-center justify-between gap-1 rounded-md border border-line bg-surface-2 px-2 text-sm text-fg outline-none transition-colors",
+          "group flex h-(--control-h) w-full min-w-0 items-center justify-between gap-1 rounded-md border border-line bg-surface-2 px-2 text-sm text-fg outline-none transition-colors",
           "hover:border-line-strong focus-visible:border-accent-text data-[state=open]:border-accent-text",
           "data-disabled:pointer-events-none data-disabled:text-fg-disabled data-placeholder:text-fg-secondary",
           className,
@@ -41,7 +41,7 @@ export function Select({
       >
         <RadixSelect.Value placeholder={placeholder} className="truncate" />
         <RadixSelect.Icon asChild>
-          <ChevronDown size={14} strokeWidth={1.75} aria-hidden className="shrink-0 text-fg-secondary" />
+          <ChevronDown size={14} strokeWidth={1.75} aria-hidden className="shrink-0 text-fg-secondary group-data-disabled:text-fg-disabled" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
 

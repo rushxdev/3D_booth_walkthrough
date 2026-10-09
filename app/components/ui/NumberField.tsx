@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
 import { cn } from "./../../lib/cn";
 import { clamp, formatNumber, parseNumber, roundTo } from "./../../lib/number";
+import { spokenValue } from "./../../lib/a11y"
 
 type NumberFieldProps = {
   value: number;
@@ -142,11 +143,11 @@ export function NumberField({
       <input
         ref={inputRef}
         id={id}
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        spellCheck={false}
-        disabled={disabled}
+        role="spinbutton"
+        aria-valuenow={Number.isFinite(value) ? value : undefined}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuetext={spokenValue(value, precision, unit)}
         aria-invalid={showInvalid || undefined}
         value={display}
         onChange={(e) => {
