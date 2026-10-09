@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { newId } from "./../lib/id";
 import { MAX_NAME_LENGTH, createScreen, nextScreenName, sanitizeScreenPatch } from "./../lib/schema";
-import type { Screen, ScreenPatch } from "./../lib/schema";
+import type { Screen, ScreenPatch, Vec3 } from "./../lib/schema";
 import { offsetAlongRight } from "./../three/screens/placement";
 
 /** A locked screen ignores these. Name, visibility and the lock flag itself always work. */
@@ -55,11 +55,17 @@ export const useScreenStore = create<ScreenState>()((set, get) => ({
   duplicate: (id) => {
     const source = get().screens.find((s) => s.id === id);
     if (!source) return null;
+
+    const moved =
+      sanitizeScreenPatch({
+        position: offsetAlongRight(source.position, source.rotation, DUPLICATE_OFFSET),
+      }).position ?? ([...source.position] as Vec3);
+
     const copy: Screen = {
       ...source,
       id: newId(),
       name: `${source.name} copy`.slice(0, MAX_NAME_LENGTH),
-      position: offsetAlongRight(source.position, source.rotation, DUPLICATE_OFFSET),
+      position: moved,
       rotation: [...source.rotation],
       content: { ...source.content },
       resolution: [...source.resolution],

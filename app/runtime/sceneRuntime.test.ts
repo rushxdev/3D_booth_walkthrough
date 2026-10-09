@@ -9,6 +9,7 @@ import { useUiStore } from "./../store/useUiStore";
 import { orbitView } from "./../three/controls/orbitView";
 import { player } from "./../three/controls/player";
 import { onCanvasCrash, resetSceneRuntime } from "./sceneRuntime";
+import { useFaultStore } from "../store/useFaultStore";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -24,6 +25,7 @@ describe("resetSceneRuntime", () => {
     orbitView.valid = true;
     useUiStore.setState({ mode: "walk", walkLocked: true });
     useGraphicsStore.getState().markLost();
+    useFaultStore.getState().report("walk", new Error("x"));
 
     resetSceneRuntime();
 
@@ -34,6 +36,7 @@ describe("resetSceneRuntime", () => {
     expect(orbitView.valid).toBe(false);
     expect(useUiStore.getState()).toMatchObject({ mode: "overview", walkLocked: false });
     expect(useGraphicsStore.getState().status).toBe("ok");
+    expect(useFaultStore.getState().fault).toBeNull();
   });
 });
 

@@ -5,6 +5,7 @@ import { useUiStore } from "./../store/useUiStore";
 import { clearColliderCache } from "./../three/collision/colliderCache";
 import { orbitView } from "./../three/controls/orbitView";
 import { player } from "./../three/controls/player";
+import { useFaultStore } from "./../store/useFaultStore";
 
 /** Runs the moment the canvas crashes: make the rest of the UI usable again. */
 export function onCanvasCrash(): void {
@@ -24,4 +25,5 @@ export function resetSceneRuntime(): void {
   useUiStore.setState({ walkLocked: false });
   useUiStore.getState().setMode("overview");
   useGraphicsStore.getState().reset();
+  useFaultStore.getState().clear();
 }

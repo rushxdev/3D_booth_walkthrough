@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
-import { useFrame, useStore } from "@react-three/fiber";
+import { useStore } from "@react-three/fiber";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
 import { useSceneStore } from "./../../store/useSceneStore";
@@ -20,6 +20,7 @@ import { placePlayer, player } from "./player";
 import { registerPointerLocker } from "./walkLock";
 import { walkInput } from "./walkInput";
 import { takeWalkResume } from "./../../presentation/cameraResume";
+import { useGuardedFrame } from "./useGuardedFrame";
 
 const euler = new THREE.Euler(0, 0, 0, "YXZ");
 
@@ -71,6 +72,7 @@ export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group |
 
       const key = getModelKey(model);
       const root = modelRef.current;
+      root?.updateMatrixWorld(true); // a model swapped during Walk has not rendered yet
       const collider = root ? getCollider(root, key) : null;
       colliderRef.current = collider;
 
@@ -105,7 +107,7 @@ export function WalkController({ modelRef }: { modelRef: RefObject<THREE.Group |
     spawn(false);
   }, [resetTick, spawn]);
 
-  useFrame((state, delta) => {
+  useGuardedFrame("walk", (state, delta) => {
     const dt = Math.min(delta, MAX_DT);
     const { camera } = state;
     const ui = useUiStore.getState();

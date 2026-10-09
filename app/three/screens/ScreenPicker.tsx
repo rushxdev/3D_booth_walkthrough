@@ -80,9 +80,9 @@ export function ScreenPicker({ screensRef, modelRef }: Props) {
       down = e.button === 0 && !gizmo.controls?.axis ? { x: e.clientX, y: e.clientY } : null;
     };
     const onUp = (e: PointerEvent) => {
-      if (isPresenting()) return;
       const start = down;
       down = null;
+      if (isPresenting()) return;
       if (!start || e.button !== 0) return;
       if (!isClick(start, { x: e.clientX, y: e.clientY })) return; // an orbit drag
       const ui = useUiStore.getState();

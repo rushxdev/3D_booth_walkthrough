@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
-import { useFrame, useStore } from "@react-three/fiber";
+import { useStore } from "@react-three/fiber";
 import * as THREE from "three";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { useScreenStore } from "./../../store/useScreenStore";
@@ -14,6 +14,7 @@ import { ACCENT_COLOR } from "../scene/theme";
 import { poseOnSurface } from "./surfacePlacement";
 import type { Pose } from "./surfacePlacement";
 import { usePresenting } from "@/app/presentation/usePresenting";
+import { useGuardedFrame } from "./../controls/useGuardedFrame";
 
 const OUTLINE_POINTS = new Float32Array([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0]);
 
@@ -58,7 +59,7 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
     };
   }, [placing, presenting, store, modelRef]);
 
-  useFrame(() => {
+  useGuardedFrame("placement-preview", () => {
     const g = group.current;
     if (!g) return;
     const screens = useScreenStore.getState();
