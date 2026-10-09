@@ -61,4 +61,9 @@ describe("useUiStore", () => {
     useUiStore.getState().setMode("walk");
     expect(useUiStore.getState().placing).toBe(false);
   });
+  it("setPresentation(true) ends the Place tool", () => {
+    useUiStore.setState({ placing: true, presentation: false });
+    useUiStore.getState().setPresentation(true);
+    expect(useUiStore.getState()).toMatchObject({ presentation: true, placing: false });
+  });
 });

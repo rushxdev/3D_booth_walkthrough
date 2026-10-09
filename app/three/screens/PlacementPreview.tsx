@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
-import { useFrame, useStore } from "@react-three/fiber";
+import { useStore } from "@react-three/fiber";
 import * as THREE from "three";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { useScreenStore } from "./../../store/useScreenStore";
@@ -13,18 +13,22 @@ import { pointerToNdc } from "./picking";
 import { ACCENT_COLOR } from "../scene/theme";
 import { poseOnSurface } from "./surfacePlacement";
 import type { Pose } from "./surfacePlacement";
+import { usePresenting } from "@/app/presentation/usePresenting";
+import { useGuardedFrame } from "./../controls/useGuardedFrame";
 
 const OUTLINE_POINTS = new Float32Array([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0]);
 
 /** Shows where the selected screen would land under the pointer. Reads and writes no React state. */
 export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group | null> }) {
+  const presenting = usePresenting();
   const store = useStore();
   const placing = useUiStore((s) => s.placing);
   const group = useRef<THREE.Group>(null);
   const pose = useRef<Pose | null>(null);
 
   useEffect(() => {
-    if (!placing) return;
+    if (!placing || presenting) return;
+    const g = group.current;
     const element = store.getState().gl.domElement;
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -52,11 +56,11 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
       element.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(frame);
       pose.current = null;
-      if (group.current) group.current.visible = false;
+      if (g) g.visible = false;
     };
-  }, [placing, store, modelRef]);
+  }, [placing, presenting, store, modelRef]);
 
-  useFrame(() => {
+  useGuardedFrame("placement-preview", () => {
     const g = group.current;
     if (!g) return;
     const screens = useScreenStore.getState();
@@ -71,6 +75,8 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
     g.rotation.set(...p.rotation);
     g.scale.set(selected.width, selected.height, 1);
   });
+
+  if (presenting) return null;
 
   return (
     <group ref={group} visible={false} rotation-order="YXZ">

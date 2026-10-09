@@ -31,13 +31,15 @@ export function ScreenVideo({ screenId, src, fit, width, height }: Props) {
       return () => clear(screenId);
     }
 
-    const p = createVideoPlayer(url, {
-      onMetadata: (a) => patch(screenId, { phase: "ready", aspect: a }),
+    const p: VideoPlayer = createVideoPlayer(url, {
+      onMetadata: (a) => {
+        patch(screenId, { phase: "ready", aspect: a });
+        setPlayer(p); // the picture is only drawn once metadata is known
+      },
       onError: (message) => patch(screenId, { phase: "error", message }),
       onPlayingChange: (playing) => patch(screenId, { playing }),
     });
     const unregister = registerPlayer(screenId, p);
-    setPlayer(p);
     void p.play();
 
     return () => {

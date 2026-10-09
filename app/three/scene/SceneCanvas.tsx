@@ -17,6 +17,8 @@ import { BACKGROUND_COLOR } from "./theme";
 import { ScreenPicker } from "../screens/ScreenPicker";
 import { Screens } from "../screens/Screens";
 import { PlacementPreview } from "../screens/PlacementPreview";
+import { usePresenting } from "@/app/presentation/usePresenting";
+import { ContextWatcher } from "./ContextWatcher";
 
 // Keep in sync with --surface-0 in globals.css (WebGL can't read CSS variables).
 
@@ -27,6 +29,7 @@ export default function SceneCanvas() {
   const modelRef = useRef<THREE.Group>(null);
   const setMode = useUiStore((s) => s.setMode);
   const screensRef = useRef<THREE.Group>(null);
+  const presenting = usePresenting();
   
   useEffect(() => {
     if (!model && mode === "walk") setMode("overview");
@@ -49,8 +52,9 @@ export default function SceneCanvas() {
       <fog attach="fog" args={[BACKGROUND_COLOR, 80, 220]} />
 
       <Lighting />
+      <ContextWatcher />
       < CameraTracker />
-      <Floor />
+      <Floor showGrid={!presenting} />
       <group ref={modelRef}>
         {model?.kind === "sample" && <SampleBooth />}
         {model?.kind === "file" && (

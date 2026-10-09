@@ -65,30 +65,35 @@ function sanitizeContent(raw: unknown): ScreenContent | null {
  * Keeps only valid fields of a patch and normalizes them (trim, clamp, copy arrays). Anything
  * invalid is dropped, never thrown. Also the basis for validating imported files (9.4).
  */
-export function sanitizeScreenPatch(patch: ScreenPatch): ScreenPatch {
+export function sanitizeScreenPatch(patch: ScreenPatch | unknown): ScreenPatch {
+  if (!patch || typeof patch !== "object" || Array.isArray(patch)) {
+    return {};
+  }
+
+  const p = patch as Partial<ScreenPatch>;
   const out: ScreenPatch = {};
 
-  if (typeof patch.name === "string") {
-    const name = patch.name.trim().slice(0, MAX_NAME_LENGTH);
+  if (typeof p.name === "string") {
+    const name = p.name.trim().slice(0, MAX_NAME_LENGTH);
     if (name) out.name = name;
   }
-  if (isVec3(patch.position)) {
-    out.position = patch.position.map((n) => clamp(n, POSITION_RANGE.min, POSITION_RANGE.max)) as Vec3;
+  if (isVec3(p.position)) {
+    out.position = p.position.map((n) => clamp(n, POSITION_RANGE.min, POSITION_RANGE.max)) as Vec3;
   }
-  if (Array.isArray(patch.resolution) && patch.resolution.length === 2 && patch.resolution.every(isFiniteNumber)) {
-    out.resolution = [clampInt(patch.resolution[0]), clampInt(patch.resolution[1])];
+  if (Array.isArray(p.resolution) && p.resolution.length === 2 && p.resolution.every(isFiniteNumber)) {
+    out.resolution = [clampInt(p.resolution[0]), clampInt(p.resolution[1])];
   }
-  if (isVec3(patch.rotation)) out.rotation = [...patch.rotation];
+  if (isVec3(p.rotation)) out.rotation = [...p.rotation];
   for (const key of ["width", "height"] as const) {
-    const v = patch[key];
+    const v = p[key];
     if (isFiniteNumber(v)) out[key] = clamp(v, SCREEN_SIZE_RANGE.min, SCREEN_SIZE_RANGE.max);
   }
-  if (patch.content !== undefined) {
-    const content = sanitizeContent(patch.content);
+  if (p.content !== undefined) {
+    const content = sanitizeContent(p.content);
     if (content) out.content = content;
   }
-  if (typeof patch.visible === "boolean") out.visible = patch.visible;
-  if (typeof patch.locked === "boolean") out.locked = patch.locked;
+  if (typeof p.visible === "boolean") out.visible = p.visible;
+  if (typeof p.locked === "boolean") out.locked = p.locked;
   return out;
 }
 

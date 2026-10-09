@@ -13,6 +13,7 @@ import { gizmo } from "./gizmoState";
 import { isClick, pointerToNdc, resolvePick } from "./picking";
 import type { ScreenHit } from "./picking";
 import { poseOnSurface } from "./surfacePlacement";
+import { isPresenting } from "@/app/presentation/usePresenting";
 
 type Props = {
   screensRef: RefObject<THREE.Group | null>;
@@ -81,6 +82,7 @@ export function ScreenPicker({ screensRef, modelRef }: Props) {
     const onUp = (e: PointerEvent) => {
       const start = down;
       down = null;
+      if (isPresenting()) return;
       if (!start || e.button !== 0) return;
       if (!isClick(start, { x: e.clientX, y: e.clientY })) return; // an orbit drag
       const ui = useUiStore.getState();

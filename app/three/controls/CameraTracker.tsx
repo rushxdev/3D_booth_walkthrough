@@ -1,10 +1,10 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
+import { useGuardedFrame } from "./useGuardedFrame";
 import { cameraPose } from "./cameraPose";
 
 export function CameraTracker() {
-  useFrame(({ camera }) => {
+  useGuardedFrame("camera-tracker", ({ camera }) => {
     cameraPose.position.copy(camera.position);
     camera.getWorldDirection(cameraPose.direction);
   });

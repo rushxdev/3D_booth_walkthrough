@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useVideoStore } from "./../../../store/useVideoStore";
 import { registerPlayer, type VideoPlayer } from "./videoPlayer";
-import { toggleMute, togglePlay } from "./videoControls";
+import { setAllMuted, toggleMute, togglePlay } from "./videoControls";
 
 function fakePlayer(paused: boolean, muted: boolean) {
   const video = { paused, muted };
@@ -48,5 +48,19 @@ describe("videoControls", () => {
       togglePlay("nope");
       toggleMute("nope");
     }).not.toThrow();
+  });
+
+  it("setAllMuted mutes or unmutes every registered player and records it", () => {
+    const a = fakePlayer(false, true);
+    const b = fakePlayer(false, true);
+    const offA = registerPlayer("a", a);
+    const offB = registerPlayer("b", b);
+    setAllMuted(false);
+    expect(a.video.muted).toBe(false);
+    expect(useVideoStore.getState().byScreen.b.muted).toBe(false);
+    setAllMuted(true);
+    expect(b.video.muted).toBe(true);
+    offA();
+    offB();
   });
 });
