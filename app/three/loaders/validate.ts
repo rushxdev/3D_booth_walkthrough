@@ -3,6 +3,8 @@ import type { LoadIssue } from "./errors";
 
 export const ALLOWED_EXTENSIONS = ["glb", "gltf"] as const;
 export const LARGE_FILE_BYTES = 150 * 1024 * 1024;
+export const MAX_FILE_BYTES = 512 * 1024 * 1024; // refused before reading
+export const MAX_GLTF_JSON_BYTES = 200 * 1024 * 1024; // .gltf is decoded into one string
 
 export function getExtension(name: string): string {
   const i = name.lastIndexOf(".");
@@ -38,6 +40,30 @@ export function validateModelFile(file: { name: string; size: number }): Validat
         code: "empty-file",
         title: "File is empty",
         message: `"${file.name}" is 0 bytes. The export may have failed. Export the model again and retry.`,
+      },
+    };
+  }
+
+  if (file.size > MAX_FILE_BYTES) {
+    return {
+      ok: false,
+      error: {
+        severity: "error",
+        code: "too-large",
+        title: "File is too large",
+        message: `"${file.name}" is ${formatBytes(file.size)}, over the ${formatBytes(MAX_FILE_BYTES)} a browser can open reliably. Compress geometry (Draco) and textures (KTX2), reduce the triangle count, or split the booth into parts, then export again.`,
+      },
+    };
+  }
+
+  if (getExtension(file.name) === "gltf" && file.size > MAX_GLTF_JSON_BYTES) {
+    return {
+      ok: false,
+      error: {
+        severity: "error",
+        code: "too-large",
+        title: "File is too large as .gltf",
+        message: `A .gltf this large (${formatBytes(file.size)}) can't be read in one piece by a browser. Export it as a single .glb instead.`,
       },
     };
   }

@@ -9,6 +9,8 @@ export type LoadIssueCode =
   | "out-of-memory"
   | "read-failed"
   | "corrupt-file"
+  | "too-large"
+  | "cancelled"
   | "unexpected";
 
 export type LoadIssue = {
