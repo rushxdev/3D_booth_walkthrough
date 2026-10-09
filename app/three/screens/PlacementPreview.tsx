@@ -28,6 +28,7 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
 
   useEffect(() => {
     if (!placing || presenting) return;
+    const g = group.current;
     const element = store.getState().gl.domElement;
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -55,7 +56,7 @@ export function PlacementPreview({ modelRef }: { modelRef: RefObject<THREE.Group
       element.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(frame);
       pose.current = null;
-      if (group.current) group.current.visible = false;
+      if (g) g.visible = false;
     };
   }, [placing, presenting, store, modelRef]);
 

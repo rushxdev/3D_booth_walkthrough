@@ -141,6 +141,8 @@ export function NumberField({
       )}
     >
       <input
+        ref={inputRef}
+        id={id}
         role="spinbutton"
         aria-valuenow={Number.isFinite(value) ? value : undefined}
         aria-valuemin={min}
