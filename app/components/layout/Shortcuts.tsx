@@ -8,6 +8,8 @@ import { useUiStore } from "./../../store/useUiStore";
 import { presentationKeyAction } from "@/app/presentation/presentationKeys";
 import { togglePresentation, toggleView } from "@/app/presentation/presentationControl";
 import { isPresenting } from "@/app/presentation/usePresenting";
+import { isHelpKey } from "@/app/shortcuts/shortcutList";
+import { useHelpStore } from "@/app/store/useHelpStore";
 
 /** Single place for global keyboard shortcuts. */
 export function Shortcuts() {
@@ -30,6 +32,13 @@ export function Shortcuts() {
       if (action === "toggle-view") {
         e.preventDefault();
         toggleView();
+        return;
+      }
+      
+      if (isHelpKey(e)) {
+        if (useUiStore.getState().walkLocked) return; // the list could not be read or closed
+        e.preventDefault();
+        useHelpStore.getState().toggle();
         return;
       }
 
@@ -92,9 +101,12 @@ export function Shortcuts() {
           }
           break;
         }
-        case "escape":
-          if (ui.placing) ui.setPlacing(false);
+        case "escape": {
+          const help = useHelpStore.getState();
+          if (help.open) help.close();
+          else if (ui.placing) ui.setPlacing(false);
           break;
+        }
       }
     }
 

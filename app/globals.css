@@ -26,6 +26,7 @@
 
   /* Status (errors only; not a second accent) */
   --danger: #e5484d;
+  --danger-text: #ef6a6e; /* error text/icons on dark surfaces */
 
   /* Geometry */
   --radius-sm: 3px;
@@ -54,7 +55,7 @@
   --color-accent-text: var(--accent-text);
   --color-accent-subtle: var(--accent-subtle);
   --color-danger: var(--danger);
-
+  --color-danger-text: var(--danger-text);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 

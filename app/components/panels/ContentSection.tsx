@@ -135,7 +135,7 @@ function ContentBody({ screen }: { screen: Screen }) {
       )}
 
       {message && (
-        <p role="alert" className={`px-3 py-1 text-xs ${isError ? "text-danger" : "text-fg-secondary"}`}>
+        <p role="alert" className={`px-3 py-1 text-xs ${isError ? "text-danger-text" : "text-fg-secondary"}`}>
           {message}
         </p>
       )}

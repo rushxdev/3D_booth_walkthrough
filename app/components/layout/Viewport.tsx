@@ -59,7 +59,7 @@ export function Viewport() {
   };
 
   return (
-    <main className="relative min-h-0 min-w-0 flex-1 bg-surface-0" {...handlers}>
+    <main aria-label="3D Viewport" className="relative min-h-0 min-w-0 flex-1 bg-surface-0" {...handlers}>
       {fault ? (
         <CanvasFallback
           error={fault.error}

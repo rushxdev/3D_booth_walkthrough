@@ -16,7 +16,7 @@ export function GraphicsNotice({ onReload }: { onReload: () => void }) {
         <span className="text-fg-secondary">Graphics were interrupted. Waiting for the browser to restore them…</span>
       ) : (
         <>
-          <span className="text-danger">The browser did not restore graphics.</span>
+          <span className="text-danger-text">The browser did not restore graphics.</span>
           <Button variant="primary" onClick={onReload}>
             Reload scene
           </Button>

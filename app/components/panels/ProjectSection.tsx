@@ -96,7 +96,7 @@ export function ProjectSection() {
       </Row>
 
       {importError && (
-        <p role="alert" className="text-xs text-danger">
+        <p role="alert" className="text-xs text-danger-text">
           {importError}
         </p>
       )}

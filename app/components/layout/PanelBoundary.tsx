@@ -13,7 +13,7 @@ export function PanelBoundary({ name, children }: { name: string; children: Reac
       resetKeys={[selectedId]} // picking another screen is the usual way out of a bad state
       fallback={(_error, reset) => (
         <div role="alert" className="flex items-center gap-2 border-b border-line px-3 py-2 text-xs">
-          <span className="text-danger">{name} could not be shown.</span>
+          <span className="text-danger-text">{name} could not be shown.</span>
           <div className="flex-1" />
           <Button onClick={reset}>Retry</Button>
         </div>

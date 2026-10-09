@@ -54,7 +54,7 @@ export function ViewportNotice() {
       )}
     >
       <div className="min-w-0 flex-1">
-        <div className={cn("text-sm font-medium", isError ? "text-danger" : "text-fg")}>{issue.title}</div>
+        <div className={cn("text-sm font-medium", isError ? "text-danger-text" : "text-fg")}>{issue.title}</div>
         <p className="mt-0.5 text-sm text-fg-secondary">{issue.message}</p>
       </div>
       <IconButton icon={X} label="Dismiss" size="sm" onClick={() => setIssue(null)} />

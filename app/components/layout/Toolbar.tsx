@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair, Play, Pause, Presentation } from "lucide-react";
+import { Box, FolderOpen, X, Footprints, Maximize, Orbit, RotateCcw, Monitor, Magnet, Move3d, Rotate3d, Crosshair, Play, Pause, Presentation, CircleHelp } from "lucide-react";
 import { IconButton } from "./../../components/ui/IconButton";
 import { useSceneStore } from "./../../store/useSceneStore";
 import { openModelDialog } from "./../../three/loaders/openModelFiles";
@@ -12,6 +12,7 @@ import { useVideoStore } from "@/app/store/useVideoStore";
 import { pauseAll, playAll } from "@/app/three/screens/Video/videoPlayer";
 import { usePersistenceStore } from "@/app/store/usePersistenceStore";
 import { togglePresentation } from "@/app/presentation/presentationControl";
+import { useHelpStore } from "@/app/store/useHelpStore";
 
 export function Toolbar() {
   const hasModel = useSceneStore((s) => s.model !== null);
@@ -34,17 +35,47 @@ export function Toolbar() {
   const overview = mode === "overview";
   const anyVideoReady = useVideoStore((s) => Object.values(s.byScreen).some((v) => v.phase === "ready"));
   const restoring = usePersistenceStore((s) => s.restoring);
+  const helpOpen = useHelpStore((s) => s.open);
+  const toggleHelp = useHelpStore((s) => s.toggle);
 
   return (
     <header className="flex h-(--toolbar-h) shrink-0 items-center gap-1 border-b border-line bg-surface-1 px-3">
       <span className="mr-2 text-sm font-medium text-fg">Booth Viewer</span>
       
-      <IconButton icon={FolderOpen} label="Open model" onClick={openModelDialog} />
-      <IconButton icon={Box} label="Load sample" onClick={loadSample} />
-      <IconButton icon={X} label="Close model" onClick={clearModel} disabled={!hasModel} />
-      <IconButton icon={Monitor} label="Add screen" onClick={addScreenInView} disabled={!hasModel || restoring} />
-      <IconButton icon={Play} label="Play all videos" onClick={playAll} disabled={!anyVideoReady} />
-      <IconButton icon={Pause} label="Pause all videos" onClick={pauseAll} disabled={!anyVideoReady} />
+      <IconButton 
+        icon={FolderOpen} 
+        label="Open model" 
+        onClick={openModelDialog} 
+      />
+      <IconButton 
+        icon={Box} 
+        label="Load sample" 
+        onClick={loadSample} 
+      />
+      <IconButton 
+        icon={X} 
+        label="Close model" 
+        onClick={clearModel} 
+        disabled={!hasModel} 
+      />
+      <IconButton 
+        icon={Monitor} 
+        label="Add screen" 
+        onClick={addScreenInView} 
+        disabled={!hasModel || restoring} 
+      />
+      <IconButton 
+        icon={Play} 
+        label="Play all videos" 
+        onClick={playAll} 
+        disabled={!anyVideoReady} 
+      />
+      <IconButton 
+        icon={Pause} 
+        label="Pause all videos" 
+        onClick={pauseAll} 
+        disabled={!anyVideoReady} 
+      />
 
       <div className="mx-1 h-4 w-px bg-line" />
       <SegmentedControl
@@ -75,6 +106,13 @@ export function Toolbar() {
       />
 
       <div className="flex-1" />
+      <IconButton 
+        icon={CircleHelp} 
+        label="Keyboard shortcuts" 
+        shortcut="?" 
+        active={helpOpen} 
+        onClick={toggleHelp} 
+      />
       <IconButton 
         icon={RotateCcw} 
         label="Reset position" 

@@ -11,6 +11,7 @@ import { Shortcuts } from "./Shortcuts";
 import { usePresenting } from "@/app/presentation/usePresenting";
 import { startPresentationGuard } from "@/app/presentation/presentationControl";
 import { startVideoSourceSync } from "@/app/three/screens/Video/videoSync";
+import { ShortcutHelp } from "./ShortcutHelp";
 
 export function AppShell() {
   const presenting = usePresenting();
@@ -32,6 +33,7 @@ export function AppShell() {
         </div>
       </div>
       <PresentationBar />
+      <ShortcutHelp />
     </TooltipProvider>
   );
 }
