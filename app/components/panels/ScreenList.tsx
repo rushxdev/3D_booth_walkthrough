@@ -168,7 +168,7 @@ export function ScreenList() {
       {screens.length === 0 ? (
         <div className="flex flex-col items-start gap-2">
           <p className="text-sm text-fg-secondary">No screens yet.</p>
-          <Button icon={Plus} disabled={!hasModel} onClick={addScreenInView}>
+          <Button icon={Plus} disabled={!hasModel}  disabledHint="Load a model first" onClick={addScreenInView}>
             Add screen
           </Button>
         </div>

@@ -3,6 +3,7 @@
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "./../../lib/cn";
+import { segmentHint, segmentTooltip } from "./segmentLabel";
 import { Tooltip } from "./Tooltip";
 
 export type SegmentOption = {
@@ -49,18 +50,19 @@ export function SegmentedControl({
     >
       {options.map((o) => {
         const Icon = o.icon;
+        const hint = segmentHint(o);
         const item = (
           <ToggleGroup.Item
-            key={o.value}
             value={o.value}
             disabled={o.disabled}
-            title={o.disabled ? o.hint : undefined}
-            aria-label={iconOnly ? o.label : undefined}
+            aria-label={iconOnly || hint ? segmentTooltip(o) : undefined}
             className={cn(
               "inline-flex h-full shrink-0 items-center justify-center gap-1.5 rounded-sm text-sm text-fg-secondary transition-colors",
-              iconOnly ? "h-6 w-6 min-w-6" : "px-2 min-w-0",
+              iconOnly ? "w-6 min-w-6" : "min-w-0 px-2",
               "hover:text-fg data-[state=on]:bg-accent-subtle data-[state=on]:text-accent-text data-[state=on]:hover:text-accent-text",
               "data-disabled:pointer-events-none data-disabled:text-fg-disabled",
+              // a selected option in a disabled group must not look active
+              "data-disabled:data-[state=on]:bg-line data-disabled:data-[state=on]:text-fg-disabled",
             )}
           >
             {Icon && <Icon size={14} strokeWidth={1.75} aria-hidden />}
@@ -68,15 +70,18 @@ export function SegmentedControl({
           </ToggleGroup.Item>
         );
 
-        if (!iconOnly) return item;
-
+        // The wrapper carries the explanation: a disabled button with pointer-events off cannot.
+        if (iconOnly) {
+          return (
+            <Tooltip key={o.value} label={segmentTooltip(o)} shortcut={o.shortcut}>
+              <span className="inline-flex h-full shrink-0 items-center justify-center">{item}</span>
+            </Tooltip>
+          );
+        }
         return (
-          <Tooltip key={o.value} label={o.label} shortcut={o.shortcut}>
-            {/* If your Tooltip wrapper supports asChild, use it. Otherwise a span with flex keeps layout stable */}
-            <span className="inline-flex shrink-0 items-center justify-center">
-              {item}
-            </span>
-          </Tooltip>
+          <span key={o.value} title={hint} className="inline-flex h-full min-w-0">
+            {item}
+          </span>
         );
       })}
     </ToggleGroup.Root>
