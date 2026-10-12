@@ -3,8 +3,7 @@
 A browser tool for design reviews of event booths and stages. Load a 3D model, look around it from outside, walk through it in first person, add real-size screens, play video on them, save the setup, and present it to a client.
 
 - Live demo: https://3-d-booth-walkthrough.vercel.app/
-- Demo recording: [need to record]
-
+- Demo recording: https://drive.google.com/file/d/18NPuJLrY6Vh6k_7-4OBi83glAb9uN5OC/view?usp=sharing
 ## Features
 
 **Viewing**
